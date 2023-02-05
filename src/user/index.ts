@@ -1,6 +1,11 @@
 
 import {QueryDocumentSnapshot, type FirestoreDataConverter, Timestamp} from 'firebase/firestore'
 
+/**
+ * tells fireStore how to:
+ * - transform User instance and convert it into document data
+ * - take document data and return User instance
+ */
 const userConverter: FirestoreDataConverter<User> = {
     toFirestore(user: User){
         return {
@@ -13,22 +18,15 @@ const userConverter: FirestoreDataConverter<User> = {
         }
     },
     fromFirestore(snapshot: QueryDocumentSnapshot){
-        const {
-            username,
-            hashedPassword,
-            createdAt,
-            updatedAt,
-            requestCount,
-            darwinRequestCount,
-        } = snapshot.data()
+        const data = snapshot.data()
         
         const user = new User(
-            username,
-            hashedPassword,
-            new Date(createdAt),
-            new Date(updatedAt),
-            requestCount,
-            darwinRequestCount,
+            data.username,
+            data.hashedPassword,
+            new Date(data.createdAt),
+            new Date(data.updatedAt),
+            data.requestCount,
+            data.darwinRequestCount,
         )
 
         user.uid = snapshot.id
@@ -38,49 +36,27 @@ const userConverter: FirestoreDataConverter<User> = {
 }
 
 class User{
-    username: string
-    hashedPassword: string
-    createdAt: Date
-    updatedAt: Date
-    requestCount: number
-    darwinRequestCount: number
-
-    _uid: string | undefined
-
     constructor(
-        username: string,
-        hashedPassword: string,
-        createdAt: Date = new Date(),
-        updatedAt: Date = new Date(),
-        requestCount = 0,
-        darwinRequestCount = 0,
-    ){
-        this.username = username
-        this.hashedPassword = hashedPassword
-        this.createdAt = createdAt
-        this.updatedAt = updatedAt
-        this.requestCount = requestCount
-        this.darwinRequestCount = darwinRequestCount
-    }
-
-    static make(username: string, hashedPassword: string){
-        const now = new Date()
-        
-        return new User( username, hashedPassword, now, now, 0, 0 )
-    }
+        public username: string,
+        public hashedPassword: string,
+        public createdAt = new Date(),
+        public updatedAt = new Date(),
+        public requestCount = 0,
+        public darwinRequestCount = 0,
+        private firebaseId?: string,
+    ){ }
 
     get uid(){
-        if(!this._uid) throw new Error('uid accessed before initialisation')
+        if(!this.firebaseId) throw new Error('uid accessed before initialisation')
 
-        return this._uid
+        return this.firebaseId
     }
 
     set uid(val: string){
-        if(this._uid) throw new Error('uid already set')
+        if(this.firebaseId) throw new Error('uid already set')
 
-        this._uid = val
+        this.firebaseId = val
     }
-
 }
 
 export {userConverter}

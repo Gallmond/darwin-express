@@ -1,4 +1,9 @@
 import { type FirestoreDataConverter } from 'firebase/firestore';
+/**
+ * tells fireStore how to:
+ * - transform User instance and convert it into document data
+ * - take document data and return User instance
+ */
 declare const userConverter: FirestoreDataConverter<User>;
 declare class User {
     username: string;
@@ -7,9 +12,8 @@ declare class User {
     updatedAt: Date;
     requestCount: number;
     darwinRequestCount: number;
-    _uid: string | undefined;
-    constructor(username: string, hashedPassword: string, createdAt?: Date, updatedAt?: Date, requestCount?: number, darwinRequestCount?: number);
-    static make(username: string, hashedPassword: string): User;
+    private firebaseId?;
+    constructor(username: string, hashedPassword: string, createdAt?: Date, updatedAt?: Date, requestCount?: number, darwinRequestCount?: number, firebaseId?: string | undefined);
     get uid(): string;
     set uid(val: string);
 }

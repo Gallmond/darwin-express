@@ -51,6 +51,9 @@ if (['local', 'test'].includes(process.env.NODE_ENV ?? 'false')) {
     console.log(`In ${process.env.NODE_ENV} mode. Attaching firestore emulator`);
     (0, firestore_1.connectFirestoreEmulator)(firestore, 'localhost', 8080);
 }
+/**
+ * delete all docs in the 'users' collection that contains 'test' in its id
+ */
 const deleteTestUsers = async () => {
     const collectionRef = (0, firestore_1.collection)(firestore, 'users');
     const docs = await (0, firestore_1.getDocs)(collectionRef);
@@ -64,23 +67,31 @@ const deleteTestUsers = async () => {
     return deletedIds;
 };
 exports.deleteTestUsers = deleteTestUsers;
+/**
+ * deletes a doc in the 'users' collection by its id
+ */
 const deleteUser = async (identifier) => {
     await (0, firestore_1.deleteDoc)((0, firestore_1.doc)(firestore, 'users', identifier));
     return true;
 };
 exports.deleteUser = deleteUser;
+/**
+ * return User if it exists in the 'users' collection, or null
+ */
 const getUserByUsername = async (username) => {
     const docRef = (0, firestore_1.doc)(firestore, 'users', username).withConverter(user_1.userConverter);
     const snapshot = await (0, firestore_1.getDoc)(docRef);
     return snapshot.exists() ? snapshot.data() : null;
 };
 exports.getUserByUsername = getUserByUsername;
+/**
+ * creates a new User class and stores it in firebase. The username is the id
+ */
 const createNewUser = async (username, plaintextPass) => {
     if (await (0, exports.getUserByUsername)(username) !== null) {
         throw new Error(`${username} already exists`);
     }
-    const hashedPassword = (0, auth_1.hashPassword)(plaintextPass);
-    const user = user_1.default.make(username, hashedPassword);
+    const user = new user_1.default(username, (0, auth_1.hashPassword)(plaintextPass));
     const docRef = (0, firestore_1.doc)(firestore, 'users', user.username).withConverter(user_1.userConverter);
     user.uid = docRef.id;
     await (0, firestore_1.setDoc)(docRef, user);
