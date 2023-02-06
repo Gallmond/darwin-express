@@ -1,6 +1,6 @@
 import User from '../src/user'
 import { randomBytes } from 'crypto'
-import {createNewUser, deleteTestUsers, getUserByUsername} from '../src/firebase/firestore'
+import {createNewUser, deleteTestUsers, getUserByUsername} from '../src/services/firestore'
 
 const rand = () => randomBytes(16).toString('hex')
 

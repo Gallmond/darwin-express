@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, connectFirestoreEmulator, doc, setDoc, deleteDoc, getDoc, collection, getDocs } from 'firebase/firestore'
 import dotenv from 'dotenv'
-import { hashPassword } from '../auth'
+import { hashPassword } from './auth'
 import User, { userConverter } from '../user'
 dotenv.config()
 

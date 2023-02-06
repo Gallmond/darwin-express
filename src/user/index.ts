@@ -57,6 +57,18 @@ class User{
 
         this.firebaseId = val
     }
+
+    get json(){
+        return {
+            firebaseId : this.firebaseId,
+            username: this.username,
+            hashedPassword: this.hashedPassword,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            requestCount: this.requestCount,
+            darwinRequestCount: this.darwinRequestCount,
+        }
+    }
 }
 
 export {userConverter}

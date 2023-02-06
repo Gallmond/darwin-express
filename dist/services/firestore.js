@@ -31,7 +31,7 @@ exports.createNewUser = exports.getUserByUsername = exports.deleteUser = exports
 const app_1 = require("firebase/app");
 const firestore_1 = require("firebase/firestore");
 const dotenv_1 = __importDefault(require("dotenv"));
-const auth_1 = require("../services/auth");
+const auth_1 = require("./auth");
 const user_1 = __importStar(require("../user"));
 dotenv_1.default.config();
 // Your web app's Firebase configuration

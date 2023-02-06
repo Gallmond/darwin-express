@@ -16,6 +16,15 @@ declare class User {
     constructor(username: string, hashedPassword: string, createdAt?: Date, updatedAt?: Date, requestCount?: number, darwinRequestCount?: number, firebaseId?: string | undefined);
     get uid(): string;
     set uid(val: string);
+    get json(): {
+        firebaseId: string | undefined;
+        username: string;
+        hashedPassword: string;
+        createdAt: Date;
+        updatedAt: Date;
+        requestCount: number;
+        darwinRequestCount: number;
+    };
 }
 export { userConverter };
 export default User;

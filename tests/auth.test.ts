@@ -1,4 +1,4 @@
-import { hashPassword, passwordValid, verifyPassword } from '../src/auth'
+import { hashPassword, passwordValid, verifyPassword } from '../src/services/auth'
 
 describe('Auth utils', () => {
 

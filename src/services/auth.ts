@@ -1,3 +1,4 @@
+import EasyJWT from 'easy-jwt'
 import {scryptSync, randomBytes, timingSafeEqual} from 'node:crypto'
 
 const getSalt = (): string => {
@@ -24,3 +25,10 @@ export const verifyPassword = (plaintextPassword: string, storedHash: string): b
         Buffer.from(providedHashedPassword, 'hex')
     )
 }
+
+export const easyJwt = new EasyJWT({
+    secret: process.env.JWT_SECRET ?? randomBytes(12).toString('hex'),
+    audience: process.env.JWT_AUD ?? 'darwin-express',
+    accessToken: {expiresIn: 60 * 60 * 24 },
+    refreshToken: {expiresIn: 60 * 60 * 24 * 7 },
+})
