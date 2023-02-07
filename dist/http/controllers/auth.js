@@ -23,7 +23,7 @@ authController.post('/refresh', async (req, res, next) => {
         accessToken = auth_1.easyJwt.refreshJwt(refreshToken);
     }
     catch (error) {
-        next(new exceptions_1.HTTP422UnprocessableEntity(error instanceof Error ? error.message : 'refresh token invalid'));
+        next(new exceptions_1.HTTP401Unauthorized(error instanceof Error ? error.message : 'refresh token invalid'));
         return;
     }
     res.status(200).json({ accessToken });

@@ -5,6 +5,8 @@ import { createNewUser, deleteTestUsers } from '../src/services/firestore'
 import { HTTP401Unauthorized, HTTP422UnprocessableEntity } from '../src/http/controllers/exceptions'
 import { easyJwt } from '../src/services/auth'
 
+const DAY = 1000 * 60 * 60 * 24
+
 const looksLikeJWT = (token: string) => {
     expect(typeof token).toBe('string')
     expect(token.split('.').length).toBe(3)
@@ -225,10 +227,93 @@ describe('/auth', () =>  {
 })
 
 describe('/refresh', () => {
-    test.todo('missing refreshToken')
-    test.todo('invalid refreshToken')
-    test.todo('expired refreshToken')
-    test.todo('valid refresh token returns new access token')
+    test('missing refreshToken', async () => {
+
+        const response = await service
+            .post('/refresh')
+            .set('content-type', 'application/json')
+            .send({})
+
+        const expectedErr = new HTTP422UnprocessableEntity('missing refreshToken')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+    test('invalid refreshToken', async () => {
+        const { refreshToken } = easyJwt.createTokens('foobar')
+
+        const response = await service
+            .post('/refresh')
+            .set('content-type', 'application/json')
+            .send({refreshToken: refreshToken + 'a'})
+
+        const expectedErr = new HTTP401Unauthorized('invalid signature')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+
+    test('expired refreshToken', async () => {
+        /**
+         * after generating a token (which expires in a week) set the system time
+         * to be 8 days from now
+         */
+        const { refreshToken } = easyJwt.createTokens('foobar')
+
+        const now = new Date().valueOf()
+        const eightDaysInMilliseconds = 1000 * 60 * 60 * 24 * 8
+        const future = new Date(now + eightDaysInMilliseconds) 
+        jest.useFakeTimers().setSystemTime(future)        
+
+        const response = await service
+            .post('/refresh')
+            .set('content-type', 'application/json')
+            .send({refreshToken})
+
+        const expectedErr = new HTTP401Unauthorized('jwt expired')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+
+        jest.useRealTimers()
+    })
+
+    test('valid refresh token returns new access token', async () => {
+
+        // generate tokens as usual
+        const { refreshToken } = easyJwt.createTokens('foobar')
+
+        // advance time
+        const now = new Date().valueOf()
+        const fourDays = DAY * 4
+        jest.useFakeTimers().setSystemTime(new Date(now + fourDays))
+
+        // use refresh token
+        const response = await service
+            .post('/refresh')
+            .set('content-type', 'application/json')
+            .send({refreshToken})
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty('accessToken')
+
+        const { accessToken } = response.body
+        
+        const payload = easyJwt.verifyJwt( accessToken )
+        expect(payload.iat).not.toBeUndefined()
+
+        const iat = (payload.iat as number) * 1000
+        const exp = (payload.exp as number) * 1000
+
+        // expect issue time to be in the future and the exp to be a day later
+        expect(iat > now).toBe(true)
+        expect(exp).toBe(iat + DAY)
+
+        jest.useRealTimers()
+    })
 })
 
 describe('/revoke', () => {

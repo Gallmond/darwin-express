@@ -1,5 +1,5 @@
 import { Request, RequestHandler } from 'express'
-import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken'
+import { JwtPayload } from 'jsonwebtoken'
 import { easyJwt } from '../../services/auth'
 import { getUserByUsername } from '../../services/firestore'
 import { HTTP401Unauthorized } from '../controllers/exceptions'
