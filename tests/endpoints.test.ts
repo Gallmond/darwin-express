@@ -110,8 +110,6 @@ describe('/guarded', () => {
             .get('/guarded')
             .set('authorization', `Bearer ${accessToken}`)
             .send()
-        console.log(response.body, response.status)
-            
 
         const expectedErr = new HTTP401Unauthorized('jwt subject not found')
         const expectedJson = expectedErr.json
@@ -128,7 +126,6 @@ describe('/guarded', () => {
             .get('/guarded')
             .set('authorization', 'Bearer foobar')    
             .send()
-        console.log(response.body, response.status)
             
         const expectedErr = new HTTP401Unauthorized('jwt malformed')
         const expectedJson = expectedErr.json
@@ -302,7 +299,7 @@ describe('/refresh', () => {
 
         const { accessToken } = response.body
         
-        const payload = easyJwt.verifyJwt( accessToken )
+        const payload = await easyJwt.verifyJwt( accessToken )
         expect(payload.iat).not.toBeUndefined()
 
         const iat = (payload.iat as number) * 1000
@@ -317,7 +314,44 @@ describe('/refresh', () => {
 })
 
 describe('/revoke', () => {
-    test.todo('valid access token can be revoked')
+    test.todo('valid access token can be revoked', async () => {
+
+        // make a user with a token
+        const {username, password } = testUserCredentials()
+
+        // create the user
+        const registerResponse = await service
+            .post('/register')
+            .set('content-type', 'application/json')
+            .send({username, password})
+        expect(registerResponse.status).toBe(201)
+
+        // get the token
+        const { accessToken } = registerResponse.body
+
+        // revoke the token
+        const revokeResponse = await service
+            .post('/revoke')
+            .set('content-type', 'application/json')
+            .send({token: accessToken})
+        expect(revokeResponse.status).toBe(200)
+
+        // try to use it on guarded route
+        const guardedResponse = await service
+            .get('/guarded')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        expect(guardedResponse.status).toBe(401)
+
+
+
+
+
+
+
+
+    })
     test.todo('valid refresh token can be revoked')
 })
 

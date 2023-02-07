@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createNewUser = exports.getUserByUsername = exports.deleteUser = exports.deleteTestUsers = void 0;
+exports.tokenIsRevoked = exports.getRevokedToken = exports.addRevokedToken = exports.createNewUser = exports.getUserByUsername = exports.deleteUser = exports.deleteTestUsers = exports.deleteAllRevokedTokens = void 0;
 // Import the functions you need from the SDKs you need
 const app_1 = require("firebase/app");
 const firestore_1 = require("firebase/firestore");
@@ -51,20 +51,36 @@ if (['local', 'test'].includes(process.env.NODE_ENV ?? 'false')) {
     console.log(`In ${process.env.NODE_ENV} mode. Attaching firestore emulator`);
     (0, firestore_1.connectFirestoreEmulator)(firestore, 'localhost', 8080);
 }
+const deleteAllRevokedTokens = async () => {
+    const collectionRef = (0, firestore_1.collection)(firestore, 'revoked_tokens');
+    const docs = await (0, firestore_1.getDocs)(collectionRef);
+    const tokensToDelete = [];
+    docs.forEach(docSnapshot => {
+        tokensToDelete.push(docSnapshot.id);
+    });
+    const deletePromises = tokensToDelete.map(docId => {
+        return (0, firestore_1.deleteDoc)((0, firestore_1.doc)(firestore, 'revoked_tokens', docId));
+    });
+    await Promise.all(deletePromises);
+    return tokensToDelete;
+};
+exports.deleteAllRevokedTokens = deleteAllRevokedTokens;
 /**
  * delete all docs in the 'users' collection that contains 'test' in its id
  */
 const deleteTestUsers = async () => {
     const collectionRef = (0, firestore_1.collection)(firestore, 'users');
     const docs = await (0, firestore_1.getDocs)(collectionRef);
-    const deletedIds = [];
-    docs.forEach(async (docSnapshot) => {
+    const toDelete = [];
+    docs.forEach(docSnapshot => {
         if (docSnapshot.id.includes('test')) {
-            deletedIds.push(docSnapshot.id);
-            await (0, exports.deleteUser)(docSnapshot.id);
+            toDelete.push(docSnapshot.id);
         }
     });
-    return deletedIds;
+    await Promise.all(toDelete.map(documentId => {
+        return (0, firestore_1.deleteDoc)((0, firestore_1.doc)(firestore, 'users', documentId));
+    }));
+    return toDelete;
 };
 exports.deleteTestUsers = deleteTestUsers;
 /**
@@ -98,3 +114,51 @@ const createNewUser = async (username, plaintextPass) => {
     return user;
 };
 exports.createNewUser = createNewUser;
+const addRevokedToken = async (token, daysToLive = 100) => {
+    const docRef = (0, firestore_1.doc)(firestore, 'revoked_tokens', token);
+    const createdAt = new Date();
+    const dayInMilliseconds = 1000 * 60 * 60 * 24;
+    const keepUntil = new Date(createdAt.valueOf() + (dayInMilliseconds * daysToLive));
+    await (0, firestore_1.setDoc)(docRef, {
+        token, keepUntil, createdAt
+    });
+};
+exports.addRevokedToken = addRevokedToken;
+const getRevokedToken = async (token) => {
+    const docRef = (0, firestore_1.doc)(firestore, 'revoked_tokens', token);
+    const docSnapshot = await (0, firestore_1.getDoc)(docRef);
+    // there is no such revoked token
+    if (!docSnapshot || !docSnapshot.exists) {
+        return null;
+    }
+    const data = docSnapshot.data();
+    if (!data) {
+        throw new Error('//TODO format existant document with no data error');
+    }
+    if (typeof data.token !== 'string' ||
+        !(data.keepUntil instanceof firestore_1.Timestamp) ||
+        !(data.createdAt instanceof firestore_1.Timestamp)) {
+        throw new Error('//TODO define malformed data error');
+    }
+    /**
+     * If the token exists but we're past the keepUntil date. Treat it as though
+     * it's no longer revoked and delete it.
+     */
+    const now = new Date().valueOf();
+    const keepUntilMs = data.keepUntil.toDate().valueOf();
+    if (now > keepUntilMs) {
+        await (0, firestore_1.deleteDoc)(docRef);
+        return null;
+    }
+    return {
+        token: data.token,
+        keepUntil: data.keepUntil.toDate(),
+        createdAt: data.createdAt.toDate(),
+    };
+};
+exports.getRevokedToken = getRevokedToken;
+const tokenIsRevoked = async (token) => {
+    const tokenData = await (0, exports.getRevokedToken)(token);
+    return tokenData !== null && (tokenData.token === token);
+};
+exports.tokenIsRevoked = tokenIsRevoked;

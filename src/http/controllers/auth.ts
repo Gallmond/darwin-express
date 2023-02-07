@@ -19,7 +19,7 @@ authController.post('/refresh', async (req, res, next) => {
 
     let accessToken: string | undefined
     try {
-        accessToken = easyJwt.refreshJwt(refreshToken)
+        accessToken = await easyJwt.refreshJwt(refreshToken)
     } catch (error) {
         next(new HTTP401Unauthorized(
             error instanceof Error ? error.message : 'refresh token invalid'
