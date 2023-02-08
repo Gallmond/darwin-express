@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processJwt = void 0;
 const auth_1 = require("../../services/auth");
-const firestore_1 = require("../../services/firestore");
 const exceptions_1 = require("../controllers/exceptions");
+const database_1 = __importDefault(require("../../services/database"));
+const db = database_1.default.singleton();
 const getBearerToken = (req) => {
     const header = req.get('authorization');
     if (!header)
@@ -18,7 +22,7 @@ const processJwt = async (req, res, next) => {
     if (token) {
         let payload;
         try {
-            payload = auth_1.easyJwt.verifyJwt(token);
+            payload = await auth_1.easyJwt.verifyJwt(token);
         }
         catch (err) {
             next(new exceptions_1.HTTP401Unauthorized(err instanceof Error ? err.message : 'unknown jwt error'));
@@ -28,7 +32,12 @@ const processJwt = async (req, res, next) => {
             next(new exceptions_1.HTTP401Unauthorized('jwt missing subject'));
             return;
         }
-        const user = await (0, firestore_1.getUserByUsername)(payload.sub);
+        const revokedTokenData = await db.getRevokedToken(token);
+        if (revokedTokenData) {
+            next(new exceptions_1.HTTP401Unauthorized('token revoked'));
+            return;
+        }
+        const user = await db.getUser(payload.sub);
         if (!user) {
             next(new exceptions_1.HTTP401Unauthorized('jwt subject not found'));
             return;

@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.easyJwt = exports.verifyPassword = exports.hashPassword = exports.passwordValid = void 0;
 const easy_jwt_1 = __importDefault(require("easy-jwt"));
 const node_crypto_1 = require("node:crypto");
+const database_1 = __importDefault(require("./database"));
+const db = database_1.default.singleton();
 const getSalt = () => {
     return (0, node_crypto_1.randomBytes)(16).toString('hex');
 };
@@ -25,9 +27,14 @@ const verifyPassword = (plaintextPassword, storedHash) => {
     return (0, node_crypto_1.timingSafeEqual)(Buffer.from(storedHashedPassword, 'hex'), Buffer.from(providedHashedPassword, 'hex'));
 };
 exports.verifyPassword = verifyPassword;
-exports.easyJwt = new easy_jwt_1.default({
+const easyJwt = new easy_jwt_1.default({
     secret: process.env.JWT_SECRET ?? (0, node_crypto_1.randomBytes)(12).toString('hex'),
     audience: process.env.JWT_AUD ?? 'darwin-express',
     accessToken: { expiresIn: 60 * 60 * 24 },
     refreshToken: { expiresIn: 60 * 60 * 24 * 7 },
 });
+exports.easyJwt = easyJwt;
+const tokenRevokeCheck = async (jwt, payload) => {
+    return await db.getRevokedToken(jwt) !== null;
+};
+easyJwt.accessTokenValidation(tokenRevokeCheck);

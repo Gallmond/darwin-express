@@ -1,7 +1,9 @@
 import User from '../src/user'
 import { randomBytes } from 'crypto'
-import {addRevokedToken, createNewUser, deleteAllRevokedTokens, deleteTestUsers, getRevokedToken, getUserByUsername, tokenIsRevoked} from '../src/services/firestore'
 import { easyJwt } from '../src/services/auth'
+import FirestoreFunctions from '../src/services/firestore'
+
+const firestoreFunctions = FirestoreFunctions.singleton
 
 const rand = () => randomBytes(16).toString('hex')
 
@@ -9,7 +11,7 @@ describe('firestore token utils', () => {
 
     afterAll(async () => {
         const [deletedTokens] = await Promise.all([
-            deleteAllRevokedTokens(),
+            firestoreFunctions.deleteAllRevokedTokens(),
         ])
 
         console.log(`deleted ${deletedTokens.length} docs from revoked_tokens`, deletedTokens)
@@ -19,10 +21,10 @@ describe('firestore token utils', () => {
         const {accessToken} = easyJwt.createTokens('foobar')
 
         const daysToLive = 2
-        await addRevokedToken(accessToken, daysToLive)
+        await firestoreFunctions.addRevokedToken(accessToken, daysToLive)
 
         // check that the token was stored
-        const revokedTokenData = await getRevokedToken( accessToken )
+        const revokedTokenData = await firestoreFunctions.getRevokedToken( accessToken )
         expect(revokedTokenData).not.toBeUndefined()
 
         const revokedToken = revokedTokenData?.token as string
@@ -40,10 +42,10 @@ describe('firestore token utils', () => {
     test('tokenIsRevoked - withIn keepUntil', async () => {
         // add token for 3 days
         const {accessToken} = easyJwt.createTokens('foobar')
-        await addRevokedToken(accessToken, 3)
+        await firestoreFunctions.addRevokedToken(accessToken, 3)
 
         // check its revoked
-        expect(await tokenIsRevoked( accessToken )).toBe(true)
+        expect(await firestoreFunctions.tokenIsRevoked( accessToken )).toBe(true)
     })
 
     test('tokenIsRevoked - after keepUntil', async () => {
@@ -55,10 +57,10 @@ describe('firestore token utils', () => {
          */
         const {accessToken} = easyJwt.createTokens('foobar')
         const daysToKeep = -3
-        await addRevokedToken(accessToken, daysToKeep)
+        await firestoreFunctions.addRevokedToken(accessToken, daysToKeep)
 
         // check it was deleted
-        const existingTokenData = await getRevokedToken( accessToken )
+        const existingTokenData = await firestoreFunctions.getRevokedToken( accessToken )
         expect(existingTokenData).toBe(null)
     })
 })
@@ -68,7 +70,7 @@ describe('firestore user utils', () => {
     afterAll(async () => {
 
         const [deletedUsers] = await Promise.all([
-            deleteTestUsers()
+            firestoreFunctions.deleteTestUsers()
         ])
 
         console.log(`deleted ${deletedUsers.length} users with 'test' in id `, deletedUsers)
@@ -79,7 +81,7 @@ describe('firestore user utils', () => {
         const username = `${rand()}@test-a.com`
         const password = 'bobs password'
 
-        const newUser = await createNewUser(username, password)
+        const newUser = await firestoreFunctions.createNewUser(username, password)
         
         expect(newUser).toBeInstanceOf(User)
         expect(newUser.username).toBe(username)
@@ -89,10 +91,10 @@ describe('firestore user utils', () => {
         const username = `${rand()}@test-b.com`
         const password = 'bobs password'
 
-        await createNewUser(username, password)
+        await firestoreFunctions.createNewUser(username, password)
 
         expect(async () => {
-            await createNewUser(username, password)
+            await firestoreFunctions.createNewUser(username, password)
             expect(true).toBe(false)
         }).rejects.toThrow(`${username} already exists`)
         expect(true).toBe(true)
@@ -102,9 +104,9 @@ describe('firestore user utils', () => {
         const username = `${rand()}@test-c.com`
         const password = 'bobs password'
 
-        const newUser = await createNewUser(username, password)
+        const newUser = await firestoreFunctions.createNewUser(username, password)
 
-        const retrievedUser = await getUserByUsername(username) as User
+        const retrievedUser = await firestoreFunctions.getUserByUsername(username) as User
         expect(retrievedUser).toBeInstanceOf(User)
         expect(retrievedUser.username).toBe(newUser.username)
     })

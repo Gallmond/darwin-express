@@ -1,11 +1,13 @@
 import { randomBytes } from 'crypto'
-import app from '../src/app'
 import supertest from 'supertest'
-import { createNewUser, deleteTestUsers } from '../src/services/firestore'
 import { HTTP401Unauthorized, HTTP422UnprocessableEntity } from '../src/http/controllers/exceptions'
 import { easyJwt } from '../src/services/auth'
+import CoolApplication from '../src/experiment'
+import database from '../src/services/database'
 
 const DAY = 1000 * 60 * 60 * 24
+
+const db = database.singleton()
 
 const looksLikeJWT = (token: string) => {
     expect(typeof token).toBe('string')
@@ -22,7 +24,9 @@ const testUserCredentials = () => {
     return {username, password, accessToken, refreshToken}
 }
 
-const service = supertest(app)
+const cool = CoolApplication.make()
+
+const service = supertest(cool.expressApp)
 
 describe('/register', () => {
 
@@ -37,7 +41,7 @@ describe('/register', () => {
 
     afterAll(async () => {
         // delete test users
-        const deleted = await deleteTestUsers()
+        const deleted = await db.deleteAllTestUsers()
         console.log(`deleted ${deleted.length} test users`, deleted)
 
         // enable console
@@ -58,7 +62,7 @@ describe('/register', () => {
 
     test('username taken error', async () => {
         const {username, password} = testUserCredentials()
-        await createNewUser(username, password)
+        await db.createUser(username, password)
 
         const response = await service.post('/register')
             .set('content-type', 'application/json')
@@ -120,7 +124,7 @@ describe('/guarded', () => {
 
     test('guarded route denied - malformed token', async () => {
         const {username, password} = testUserCredentials()
-        await createNewUser(username, password)
+        await db.createUser(username, password)
 
         const response = await service
             .get('/guarded')
@@ -136,7 +140,7 @@ describe('/guarded', () => {
 
     test('jwt grants access to a guarded route', async () => {
         const {username, password, accessToken} = testUserCredentials()
-        await createNewUser(username, password)
+        await db.createUser(username, password)
 
         const response = await service
             .get('/guarded')
@@ -161,7 +165,7 @@ describe('/auth', () =>  {
 
     afterAll(async () => {
         // delete test users
-        const deleted = await deleteTestUsers()
+        const deleted = await db.deleteAllTestUsers()
         console.log(`deleted ${deleted.length} test users`, deleted)
 
         // enable console
@@ -171,7 +175,7 @@ describe('/auth', () =>  {
     test('auth success with existing user', async () => {
 
         const {username, password} = testUserCredentials()
-        await createNewUser(username, password)
+        await db.createUser(username, password)
 
         const authResponse = await service
             .post('/auth')
@@ -207,7 +211,7 @@ describe('/auth', () =>  {
 
     test('auth failure with invalid credentials', async () => {
         const {username, password} = testUserCredentials()
-        await createNewUser(username, password)
+        await db.createUser(username, password)
 
         const response = await service
             .post('/auth')
@@ -314,8 +318,37 @@ describe('/refresh', () => {
 })
 
 describe('/revoke', () => {
-    test.todo('valid access token can be revoked', async () => {
 
+    test('missing token', async () => {
+        const revokeResponse = await service
+            .post('/revoke')
+            .set('content-type', 'application/json')
+            .send({})
+
+        const expectedErr = new HTTP422UnprocessableEntity('missing token')
+        const expectedJson = expectedErr.json
+
+        expect(revokeResponse.status).toBe(expectedErr.code)
+        expect(revokeResponse.body).toEqual(expectedJson)
+    })
+
+    test('malformed token', async () => {
+        const token = easyJwt.createTokens('foo', {fizz: 'buzz'})
+
+        const revokeResponse = await service
+            .post('/revoke')
+            .set('content-type', 'application/json')
+            .send({token: token + 'a'})
+
+        const expectedErr = new HTTP422UnprocessableEntity('token could not be decoded')
+        const expectedJson = expectedErr.json
+
+        expect(revokeResponse.status).toBe(expectedErr.code)
+        expect(revokeResponse.body).toEqual(expectedJson)
+
+    })
+
+    test('valid access token can be revoked', async () => {
         // make a user with a token
         const {username, password } = testUserCredentials()
 
@@ -328,6 +361,7 @@ describe('/revoke', () => {
 
         // get the token
         const { accessToken } = registerResponse.body
+        expect(easyJwt.decode(accessToken)?.payload.sub).toBe(username)
 
         // revoke the token
         const revokeResponse = await service
@@ -342,17 +376,45 @@ describe('/revoke', () => {
             .set('authorization', `Bearer ${accessToken}`)
             .send()
 
-        expect(guardedResponse.status).toBe(401)
+        const expectedErr = new HTTP401Unauthorized('token revoked')
+        const expectedJson = expectedErr.json
 
-
-
-
-
-
-
-
+        expect(guardedResponse.status).toBe(expectedErr.code)
+        expect(guardedResponse.body).toEqual(expectedJson)
     })
-    test.todo('valid refresh token can be revoked')
+
+    test('valid refresh token can be revoked', async () => {
+        // make a user with a token
+        const {username, password } = testUserCredentials()
+
+        // create the user
+        const registerResponse = await service
+            .post('/register')
+            .set('content-type', 'application/json')
+            .send({username, password})
+        expect(registerResponse.status).toBe(201)
+
+        // get the token
+        const { refreshToken } = registerResponse.body
+
+        // revoke the token
+        const revokeResponse = await service
+            .post('/revoke')
+            .set('content-type', 'application/json')
+            .send({token: refreshToken})
+        expect(revokeResponse.status).toBe(200)
+
+        // try to use it on refresh route
+        const refreshResponse = await service
+            .post('/refresh')
+            .send({refreshToken})
+
+        const expectedErr = new HTTP401Unauthorized('refresh token revoked')
+        const expectedJson = expectedErr.json
+
+        expect(refreshResponse.status).toBe(expectedErr.code)
+        expect(refreshResponse.body).toEqual(expectedJson)
+    })
 })
 
 describe('/arrivalsAndDepartures/{csr}/to|from/{csr}', () => {
