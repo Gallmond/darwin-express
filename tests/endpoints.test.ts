@@ -504,9 +504,11 @@ describe('/arrivalsAndDepartures', () => {
     })
 
     test('all at CSR', async () => {
-        //TODO make real requests
-        // save the arrivalsAndDepartrues output as json
-        // use that in the above mocks
+        // TODO
+        // - make some real requests
+        // - save the darwin-ldb-node returned json
+        // - set up fixtures that mock darwin-ldb-node
+        // - use them for these endpoint tests 
         
         const {username, password, accessToken} = testUserCredentials()
         await db.createUser(username, password)
