@@ -64,6 +64,7 @@ darwinController.get('/arrivalsAndDepartures/:crs?/:type?/:filterCrs?', async (r
     console.log({ auth: req.auth });
     const darwin = await (0, darwin_1.darwinForUser)(req.auth.user);
     const data = await darwin.arrivalsAndDepartures(options);
+    //TODO transform this
     res.json(data).send();
 });
 exports.default = darwinController;

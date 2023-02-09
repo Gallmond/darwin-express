@@ -83,6 +83,8 @@ darwinController.get('/arrivalsAndDepartures/:crs?/:type?/:filterCrs?', async (r
     const darwin = await darwinForUser(req.auth.user)
     const data = await darwin.arrivalsAndDepartures(options)
 
+    //TODO transform this
+
     res.json(data).send()
 })
 

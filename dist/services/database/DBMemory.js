@@ -8,8 +8,8 @@ const auth_1 = require("../auth");
 const utils_1 = require("../utils");
 const types_1 = require("./types");
 class DBMemory extends types_1.DBClass {
-    static _users = {};
-    static _revokedTokens = {};
+    static _users = new Map();
+    static _revokedTokens = new Map();
     static instance;
     static make = () => {
         return new DBMemory();
@@ -33,38 +33,38 @@ class DBMemory extends types_1.DBClass {
         }
         const user = new user_1.default(username, (0, auth_1.hashPassword)(plaintextPassword));
         user.uid = username;
-        this.users[username] = user;
+        this.users.set(username, user);
         return user;
     };
     getUser = async (username) => {
-        return this.users[username] ?? null;
+        return this.users.get(username) ?? null;
     };
     updateUser = async (username, fields) => {
-        if (!this.users[username]) {
+        const thisUser = await this.getUser(username);
+        if (thisUser === null) {
             throw new Error(`${username} does not exist`);
         }
-        const { requestCount, darwinRequestCount, darwinWsdlUrl, darwinAccessToken, hashedPassword, } = this.users[username];
-        this.users[username].requestCount = fields.requestCount ?? requestCount;
-        this.users[username].darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount;
-        this.users[username].darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl;
-        this.users[username].darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken;
-        this.users[username].hashedPassword = fields.hashedPassword ?? hashedPassword;
+        const { requestCount, darwinRequestCount, darwinWsdlUrl, darwinAccessToken, hashedPassword, } = thisUser;
+        thisUser.requestCount = fields.requestCount ?? requestCount;
+        thisUser.darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount;
+        thisUser.darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl;
+        thisUser.darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken;
+        thisUser.hashedPassword = fields.hashedPassword ?? hashedPassword;
         return true;
     };
     deleteUser = async (username) => {
-        delete this.users[username];
+        this.users.delete(username);
         return true;
     };
     createRevokedToken = async (token, daysToLive) => {
         const createdAt = new Date();
         const keepUntil = new Date(createdAt.valueOf() + (utils_1.MILLISECONDS.DAY * daysToLive));
-        this.revokedTokens[token] = {
-            token, keepUntil, createdAt
-        };
-        return this.revokedTokens[token];
+        const data = { token, keepUntil, createdAt };
+        this.revokedTokens.set(token, data);
+        return data;
     };
     getRevokedToken = async (token) => {
-        const revokedTokenData = this.revokedTokens[token] ?? null;
+        const revokedTokenData = this.revokedTokens.get(token) ?? null;
         if (revokedTokenData === null) {
             return null;
         }
@@ -80,14 +80,14 @@ class DBMemory extends types_1.DBClass {
         };
     };
     deleteRevokedToken = async (token) => {
-        delete this.revokedTokens[token];
+        this.revokedTokens.delete(token);
         return true;
     };
     deleteAllTestUsers = async () => {
         const deleted = [];
         Object.keys(this.users).forEach(username => {
             deleted.push(username);
-            delete this.users[username];
+            this.users.delete(username);
         });
         return deleted;
     };
@@ -95,7 +95,7 @@ class DBMemory extends types_1.DBClass {
         const deleted = [];
         Object.keys(this.revokedTokens).forEach(token => {
             deleted.push(token);
-            delete this.revokedTokens[token];
+            this.revokedTokens.delete(token);
         });
         return deleted;
     };

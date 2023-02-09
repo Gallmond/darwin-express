@@ -1,0 +1,605 @@
+{
+  "options": {
+    "crs": "NCL",
+    "filterCrs": "KGX",
+    "filterType": "to"
+  },
+  "response": {
+    "generatedAt": "2023-02-09T18:29:27.721Z",
+    "locationName": "Newcastle",
+    "crs": "NCL",
+    "trainServices": [
+      {
+        "serviceID": "645354NWCSTLE_",
+        "eta": "On time",
+        "etd": "On time",
+        "sta": "18:26",
+        "std": "18:29",
+        "cancelled": null,
+        "platform": "4",
+        "operator": "London North Eastern Railway",
+        "operatorCode": "GR",
+        "to": {
+          "scheduled": {
+            "KGX": {
+              "locationName": "London Kings Cross",
+              "crs": "KGX",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "from": {
+          "scheduled": {
+            "EDB": {
+              "locationName": "Edinburgh",
+              "crs": "EDB",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "callingPoints": {
+          "to": {
+            "KGX": [
+              {
+                "locationName": "Durham",
+                "crs": "DHM",
+                "st": "18:40",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Darlington",
+                "crs": "DAR",
+                "st": "18:59",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "York",
+                "crs": "YRK",
+                "st": "19:27",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Doncaster",
+                "crs": "DON",
+                "st": "19:52",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Newark North Gate",
+                "crs": "NNG",
+                "st": "20:15",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Peterborough",
+                "crs": "PBO",
+                "st": "20:43",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Stevenage",
+                "crs": "SVG",
+                "st": "21:14",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "London Kings Cross",
+                "crs": "KGX",
+                "st": "21:39",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          },
+          "from": {
+            "EDB": [
+              {
+                "locationName": "Edinburgh",
+                "crs": "EDB",
+                "st": "17:00",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Alnmouth",
+                "crs": "ALM",
+                "st": "18:00",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          }
+        }
+      },
+      {
+        "serviceID": "645359NWCSTLE_",
+        "eta": "On time",
+        "etd": "On time",
+        "sta": "19:00",
+        "std": "19:02",
+        "cancelled": null,
+        "platform": "3",
+        "operator": "London North Eastern Railway",
+        "operatorCode": "GR",
+        "to": {
+          "scheduled": {
+            "KGX": {
+              "locationName": "London Kings Cross",
+              "crs": "KGX",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "from": {
+          "scheduled": {
+            "ABD": {
+              "locationName": "Aberdeen",
+              "crs": "ABD",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "callingPoints": {
+          "to": {
+            "KGX": [
+              {
+                "locationName": "Darlington",
+                "crs": "DAR",
+                "st": "19:30",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "York",
+                "crs": "YRK",
+                "st": "19:59",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Doncaster",
+                "crs": "DON",
+                "st": "20:23",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Peterborough",
+                "crs": "PBO",
+                "st": "21:14",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Stevenage",
+                "crs": "SVG",
+                "st": "21:44",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "London Kings Cross",
+                "crs": "KGX",
+                "st": "22:09",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          },
+          "from": {
+            "ABD": [
+              {
+                "locationName": "Aberdeen",
+                "crs": "ABD",
+                "st": "14:52",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Stonehaven",
+                "crs": "STN",
+                "st": "15:11",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Montrose",
+                "crs": "MTS",
+                "st": "15:33",
+                "et": null,
+                "at": "15:36",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Arbroath",
+                "crs": "ARB",
+                "st": "15:50",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Dundee",
+                "crs": "DEE",
+                "st": "16:10",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Leuchars",
+                "crs": "LEU",
+                "st": "16:24",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Kirkcaldy",
+                "crs": "KDY",
+                "st": "16:49",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Inverkeithing",
+                "crs": "INK",
+                "st": "17:05",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Haymarket",
+                "crs": "HYM",
+                "st": "17:21",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Edinburgh",
+                "crs": "EDB",
+                "st": "17:30",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Dunbar",
+                "crs": "DUN",
+                "st": "17:53",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Berwick-upon-Tweed",
+                "crs": "BWK",
+                "st": "18:16",
+                "et": null,
+                "at": "On time",
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          }
+        }
+      },
+      {
+        "serviceID": "645364NWCSTLE_",
+        "eta": "On time",
+        "etd": "On time",
+        "sta": "20:14",
+        "std": "20:17",
+        "cancelled": null,
+        "platform": "4",
+        "operator": "London North Eastern Railway",
+        "operatorCode": "GR",
+        "to": {
+          "scheduled": {
+            "KGX": {
+              "locationName": "London Kings Cross",
+              "crs": "KGX",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "from": {
+          "scheduled": {
+            "EDB": {
+              "locationName": "Edinburgh",
+              "crs": "EDB",
+              "via": null,
+              "unreachable": null
+            }
+          },
+          "current": {}
+        },
+        "callingPoints": {
+          "to": {
+            "KGX": [
+              {
+                "locationName": "Durham",
+                "crs": "DHM",
+                "st": "20:29",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Darlington",
+                "crs": "DAR",
+                "st": "20:47",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "York",
+                "crs": "YRK",
+                "st": "21:15",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Doncaster",
+                "crs": "DON",
+                "st": "21:40",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Newark North Gate",
+                "crs": "NNG",
+                "st": "22:03",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Grantham",
+                "crs": "GRA",
+                "st": "22:16",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Peterborough",
+                "crs": "PBO",
+                "st": "22:37",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Stevenage",
+                "crs": "SVG",
+                "st": "23:06",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "London Kings Cross",
+                "crs": "KGX",
+                "st": "23:31",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          },
+          "from": {
+            "EDB": [
+              {
+                "locationName": "Edinburgh",
+                "crs": "EDB",
+                "st": "18:30",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Dunbar",
+                "crs": "DUN",
+                "st": "18:54",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Berwick-upon-Tweed",
+                "crs": "BWK",
+                "st": "19:20",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Alnmouth",
+                "crs": "ALM",
+                "st": "19:43",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              },
+              {
+                "locationName": "Morpeth",
+                "crs": "MPT",
+                "st": "20:00",
+                "et": "On time",
+                "at": null,
+                "isCancelled": null,
+                "length": null,
+                "detachFront": null,
+                "adhocAlerts": null
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

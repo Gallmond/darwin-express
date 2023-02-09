@@ -3,12 +3,15 @@ import { hashPassword } from '../auth'
 import { MILLISECONDS } from '../utils'
 import { DBClass, MutableUserData, RevokedTokenData } from './types'
 
-type UsersTable = {[key: string]: User}
-type RevokedTokensTable = {[key: string]: RevokedTokenData}
+// type UsersTable = {[key: string]: User}
+// type RevokedTokensTable = {[key: string]: RevokedTokenData}
+
+type UsersTable = Map<string, User>
+type RevokedTokensTable = Map<string, RevokedTokenData>
 
 class DBMemory extends DBClass{
-    private static _users: UsersTable = {}
-    private static _revokedTokens: RevokedTokensTable = {}
+    private static _users: UsersTable = new Map()
+    private static _revokedTokens: RevokedTokensTable = new Map()
 
     private static instance: DBMemory | undefined
 
@@ -42,15 +45,17 @@ class DBMemory extends DBClass{
         const user = new User(username, hashPassword(plaintextPassword))
         user.uid = username
 
-        this.users[ username ] = user
+        this.users.set(username, user)
         
         return user
     }
     getUser = async (username: string): Promise<User | null> => {
-        return this.users[ username ] ?? null
+        return this.users.get(username) ?? null
     }
     updateUser = async (username: string, fields: MutableUserData): Promise<boolean> => {
-        if(!this.users[username]){
+        const thisUser = await this.getUser(username)
+        
+        if(thisUser === null){
             throw new Error(`${username} does not exist`)
         }
 
@@ -60,18 +65,18 @@ class DBMemory extends DBClass{
             darwinWsdlUrl,
             darwinAccessToken,
             hashedPassword,
-        } = this.users[username]
+        } = thisUser
 
-        this.users[username].requestCount = fields.requestCount ?? requestCount
-        this.users[username].darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount
-        this.users[username].darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl
-        this.users[username].darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken
-        this.users[username].hashedPassword = fields.hashedPassword ?? hashedPassword
+        thisUser.requestCount = fields.requestCount ?? requestCount
+        thisUser.darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount
+        thisUser.darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl
+        thisUser.darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken
+        thisUser.hashedPassword = fields.hashedPassword ?? hashedPassword
 
         return true
     }
     deleteUser = async (username: string): Promise<boolean> => {
-        delete this.users[username]
+        this.users.delete(username)
 
         return true
     }
@@ -81,14 +86,14 @@ class DBMemory extends DBClass{
             createdAt.valueOf() + (MILLISECONDS.DAY * daysToLive)
         )
 
-        this.revokedTokens[ token ] = {
-            token, keepUntil, createdAt
-        }
+        const data = { token, keepUntil, createdAt }
 
-        return this.revokedTokens[ token ]
+        this.revokedTokens.set(token, data)
+
+        return data
     }
     getRevokedToken = async (token: string): Promise<RevokedTokenData | null> => {
-        const revokedTokenData = this.revokedTokens[token] ?? null
+        const revokedTokenData = this.revokedTokens.get(token) ?? null
         if(revokedTokenData === null){
             return null
         }
@@ -106,7 +111,7 @@ class DBMemory extends DBClass{
         }
     }
     deleteRevokedToken = async (token: string): Promise<boolean> => {
-        delete this.revokedTokens[ token ]
+        this.revokedTokens.delete(token)
 
         return true
     }
@@ -116,7 +121,7 @@ class DBMemory extends DBClass{
         Object.keys(this.users).forEach(username => {
             deleted.push(username)
             
-            delete this.users[username]
+            this.users.delete(username)
         })
 
         return deleted
@@ -127,7 +132,7 @@ class DBMemory extends DBClass{
         Object.keys(this.revokedTokens).forEach(token => {
             deleted.push(token)
             
-            delete this.revokedTokens[token]
+            this.revokedTokens.delete(token)
         })
 
         return deleted

@@ -1,11 +1,7 @@
 import User from '../../user';
 import { DBClass, MutableUserData, RevokedTokenData } from './types';
-type UsersTable = {
-    [key: string]: User;
-};
-type RevokedTokensTable = {
-    [key: string]: RevokedTokenData;
-};
+type UsersTable = Map<string, User>;
+type RevokedTokensTable = Map<string, RevokedTokenData>;
 declare class DBMemory extends DBClass {
     private static _users;
     private static _revokedTokens;

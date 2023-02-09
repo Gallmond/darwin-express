@@ -4,10 +4,22 @@ import { HTTP401Unauthorized, HTTP422UnprocessableEntity } from '../src/http/con
 import { easyJwt } from '../src/services/auth'
 import CoolApplication from '../src/experiment'
 import database from '../src/services/database'
+import { readFileSync } from 'fs'
 
-const arrivalsAndDeparturesMock = jest.fn().mockResolvedValue({
-    foo: 'bar'
-})
+
+
+// build stubs
+const stubDir = `${__dirname}/stubs`
+
+const ncl = jest.fn().mockResolvedValue(
+    JSON.parse(readFileSync(`${stubDir}/AllAtCrs.json`, {encoding: 'utf-8'})).response
+)
+const nclFromKgx = jest.fn().mockResolvedValue(
+    JSON.parse(readFileSync(`${stubDir}/CrsFromCrs.json`, {encoding: 'utf-8'})).response
+)
+const nclToKgx = jest.fn().mockResolvedValue(
+    JSON.parse(readFileSync(`${stubDir}/CrsToCrs.json`, {encoding: 'utf-8'})).response
+)
 
 // we have to set up darwin mocks so we're not just using the real service
 jest.mock('darwin-ldb-node', () => {
@@ -15,8 +27,35 @@ jest.mock('darwin-ldb-node', () => {
         Darwin: jest.fn().mockImplementation(() => {
             return {
                 arrivalsAndDepartures: (...args: unknown[]) => {
-                    console.debug('mocked call', {args})
-                    return arrivalsAndDeparturesMock()
+            
+                    const options = (args[0] ?? {}) as Record<string, string>
+
+                    if(
+                        typeof options === 'object'
+                        && options.crs === 'NCL'
+                        && options.filterCrs === 'KGX'
+                        && options.filterType === 'to'
+                    ){
+                        return nclToKgx()
+                    }
+
+                    if(
+                        typeof options === 'object'
+                        && options.crs === 'NCL'
+                        && options.filterCrs === 'KGX'
+                        && options.filterType === 'from'
+                    ){
+                        return nclFromKgx()
+                    }
+
+                    if(
+                        typeof options === 'object'
+                        && options.crs === 'NCL'
+                    ){
+                        return ncl()
+                    }
+
+                    throw new Error('missing stub')
                 },
                 init: jest.fn().mockResolvedValue(true)
             }
@@ -26,6 +65,7 @@ jest.mock('darwin-ldb-node', () => {
         })
     }
 })
+
 
 
 const DAY = 1000 * 60 * 60 * 24
@@ -442,6 +482,7 @@ describe('/revoke', () => {
 })
 
 describe('/arrivalsAndDepartures', () => {
+
     test('401 unauthorised', async ()=> {
 
         const response = await service
