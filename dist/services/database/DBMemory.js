@@ -27,7 +27,7 @@ class DBMemory extends types_1.DBClass {
         return DBMemory._revokedTokens;
     }
     createUser = async (username, plaintextPassword) => {
-        const existingUser = this.users[username] ?? null;
+        const existingUser = await this.getUser(username);
         if (existingUser !== null) {
             throw new Error(`${username} already exists`);
         }
@@ -43,9 +43,11 @@ class DBMemory extends types_1.DBClass {
         if (!this.users[username]) {
             throw new Error(`${username} does not exist`);
         }
-        const { requestCount, darwinRequestCount, hashedPassword, } = this.users[username];
+        const { requestCount, darwinRequestCount, darwinWsdlUrl, darwinAccessToken, hashedPassword, } = this.users[username];
         this.users[username].requestCount = fields.requestCount ?? requestCount;
         this.users[username].darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount;
+        this.users[username].darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl;
+        this.users[username].darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken;
         this.users[username].hashedPassword = fields.hashedPassword ?? hashedPassword;
         return true;
     };

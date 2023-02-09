@@ -71,9 +71,7 @@ authController.post('/register', async (req, res, next) => {
         next(new exceptions_1.HTTP422UnprocessableEntity('Username must be unique'));
         return;
     }
-    // create user
     const newUser = await db.createUser(username, password);
-    // generate a JWT
     const { accessToken, expiresIn, refreshToken } = auth_1.easyJwt.createTokens(newUser.uid);
     res.status(201).json({ accessToken, expiresIn, refreshToken });
 });

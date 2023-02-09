@@ -16,6 +16,10 @@ declare class DBFirestore extends DBClass {
     deleteRevokedToken: (token: string) => Promise<boolean>;
     deleteAllTestUsers: () => Promise<string[]>;
     deleteAllRevokedTokens: () => Promise<string[]>;
+    private tokenDoc;
+    private userDoc;
+    private tokenCollection;
+    private userCollection;
 }
 export default DBFirestore;
 //# sourceMappingURL=DBFirestore.d.ts.map

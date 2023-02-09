@@ -15,6 +15,8 @@ const userConverter: FirestoreDataConverter<User> = {
             updatedAt: Timestamp.fromDate( user.updatedAt ),
             requestCount: user.requestCount,
             darwinRequestCount: user.darwinRequestCount,
+            darwinWsdlUrl: user.darwinWsdlUrl,
+            darwinAccessToken: user.darwinAccessToken,
         }
     },
     fromFirestore(snapshot: QueryDocumentSnapshot){
@@ -27,6 +29,8 @@ const userConverter: FirestoreDataConverter<User> = {
             new Date(data.updatedAt),
             data.requestCount,
             data.darwinRequestCount,
+            data.darwinWsdlUrl,
+            data.darwinAccessToken,
         )
 
         user.uid = snapshot.id
@@ -43,6 +47,8 @@ class User{
         public updatedAt = new Date(),
         public requestCount = 0,
         public darwinRequestCount = 0,
+        public darwinWsdlUrl?: string,
+        public darwinAccessToken?: string,
         private firebaseId?: string,
     ){ }
 

@@ -3,6 +3,7 @@ import express, { ErrorRequestHandler } from 'express'
 const app = express()
 
 import authController from './http/controllers/auth'
+import darwinController from './http/controllers/darwin'
 import { BaseError, HTTP401Unauthorized } from './http/controllers/exceptions'
 import { processJwt } from './http/middleware/auth'
 
@@ -23,6 +24,7 @@ app.get('/guarded', async (req, res, next) => {
 })
 
 app.use(authController)
+app.use(darwinController)
 
 
 // global error handler

@@ -62,28 +62,28 @@ class DBFirestore extends types_1.DBClass {
         return DBFirestore.instance;
     };
     createUser = async (username, plaintextPassword) => {
-        const existingUser = this.getUser(username);
+        const existingUser = await this.getUser(username);
         if (existingUser !== null) {
             throw new Error(`${username} already exists`);
         }
         const user = new user_1.default(username, (0, auth_1.hashPassword)(plaintextPassword));
-        const docRef = (0, firestore_1.doc)(this.firestore, 'users', user.username).withConverter(user_1.userConverter);
+        const docRef = this.userDoc(username);
         user.uid = docRef.id;
         await (0, firestore_1.setDoc)(docRef, user);
         return user;
     };
     getUser = async (username) => {
-        const docRef = (0, firestore_1.doc)(this.firestore, 'users', username).withConverter(user_1.userConverter);
+        const docRef = this.userDoc(username);
         const snapshot = await (0, firestore_1.getDoc)(docRef);
         return snapshot.exists() ? snapshot.data() : null;
     };
     updateUser = async (username, fields) => {
-        const docRef = (0, firestore_1.doc)(this.firestore, 'users', username).withConverter(user_1.userConverter);
+        const docRef = this.userDoc(username);
         await (0, firestore_1.setDoc)(docRef, fields, { merge: true });
         return true;
     };
     deleteUser = async (username) => {
-        await (0, firestore_1.deleteDoc)((0, firestore_1.doc)(this.firestore, 'users', username));
+        await (0, firestore_1.deleteDoc)(this.userDoc(username));
         return true;
     };
     createRevokedToken = async (token, daysToLive = 7) => {
@@ -92,12 +92,12 @@ class DBFirestore extends types_1.DBClass {
         const data = {
             token, keepUntil, createdAt
         };
-        const docRef = (0, firestore_1.doc)(this.firestore, 'revoked_tokens', token);
+        const docRef = this.tokenDoc(token);
         await (0, firestore_1.setDoc)(docRef, data);
         return data;
     };
     getRevokedToken = async (token) => {
-        const docRef = (0, firestore_1.doc)(this.firestore, 'revoked_tokens', token);
+        const docRef = this.tokenDoc(token);
         const docSnapshot = await (0, firestore_1.getDoc)(docRef);
         if (!docSnapshot || !docSnapshot.exists()) {
             return null;
@@ -107,23 +107,23 @@ class DBFirestore extends types_1.DBClass {
             throw new Error('revoked_token document has no data');
         }
         const now = new Date().valueOf();
-        if (now > docData.keepUntil.toDate().valueOf()) {
+        if (now > docData.keepUntil.valueOf()) {
             await this.deleteRevokedToken(token);
             return null;
         }
         return {
             token: docData.token,
-            createdAt: docData.createdAt.toDate(),
-            keepUntil: docData.keepUntil.toDate(),
+            createdAt: docData.createdAt,
+            keepUntil: docData.keepUntil,
         };
     };
     deleteRevokedToken = async (token) => {
-        const docRef = (0, firestore_1.doc)(this.firestore, 'revoked_tokens', token);
+        const docRef = this.tokenDoc(token);
         await (0, firestore_1.deleteDoc)(docRef);
         return true;
     };
     deleteAllTestUsers = async () => {
-        const collectionRef = (0, firestore_1.collection)(this.firestore, 'users');
+        const collectionRef = this.userCollection();
         const docs = await (0, firestore_1.getDocs)(collectionRef);
         const toDelete = [];
         docs.forEach(docSnapshot => {
@@ -132,21 +132,33 @@ class DBFirestore extends types_1.DBClass {
             }
         });
         await Promise.all(toDelete.map(documentId => {
-            return (0, firestore_1.deleteDoc)((0, firestore_1.doc)(this.firestore, 'users', documentId));
+            return (0, firestore_1.deleteDoc)(this.userDoc(documentId));
         }));
         return toDelete;
     };
     deleteAllRevokedTokens = async () => {
-        const collectionRef = (0, firestore_1.collection)(this.firestore, 'revoked_tokens');
+        const collectionRef = this.tokenCollection();
         const docs = await (0, firestore_1.getDocs)(collectionRef);
         const toDelete = [];
         docs.forEach(docSnapshot => {
             toDelete.push(docSnapshot.id);
         });
         await Promise.all(toDelete.map(documentId => {
-            return (0, firestore_1.deleteDoc)((0, firestore_1.doc)(this.firestore, 'revoked_tokens', documentId));
+            return (0, firestore_1.deleteDoc)(this.tokenDoc(documentId));
         }));
         return toDelete;
+    };
+    tokenDoc = (token) => {
+        return (0, firestore_1.doc)(this.firestore, 'revoked_tokens', token).withConverter(types_1.revokedTokenConverter);
+    };
+    userDoc = (username) => {
+        return (0, firestore_1.doc)(this.firestore, 'users', username).withConverter(user_1.userConverter);
+    };
+    tokenCollection = () => {
+        return (0, firestore_1.collection)(this.firestore, 'revoked_tokens').withConverter(types_1.revokedTokenConverter);
+    };
+    userCollection = () => {
+        return (0, firestore_1.collection)(this.firestore, 'users').withConverter(user_1.userConverter);
     };
 }
 exports.default = DBFirestore;

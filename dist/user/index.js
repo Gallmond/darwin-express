@@ -16,11 +16,13 @@ const userConverter = {
             updatedAt: firestore_1.Timestamp.fromDate(user.updatedAt),
             requestCount: user.requestCount,
             darwinRequestCount: user.darwinRequestCount,
+            darwinWsdlUrl: user.darwinWsdlUrl,
+            darwinAccessToken: user.darwinAccessToken,
         };
     },
     fromFirestore(snapshot) {
         const data = snapshot.data();
-        const user = new User(data.username, data.hashedPassword, new Date(data.createdAt), new Date(data.updatedAt), data.requestCount, data.darwinRequestCount);
+        const user = new User(data.username, data.hashedPassword, new Date(data.createdAt), new Date(data.updatedAt), data.requestCount, data.darwinRequestCount, data.darwinWsdlUrl, data.darwinAccessToken);
         user.uid = snapshot.id;
         return user;
     }
@@ -33,14 +35,18 @@ class User {
     updatedAt;
     requestCount;
     darwinRequestCount;
+    darwinWsdlUrl;
+    darwinAccessToken;
     firebaseId;
-    constructor(username, hashedPassword, createdAt = new Date(), updatedAt = new Date(), requestCount = 0, darwinRequestCount = 0, firebaseId) {
+    constructor(username, hashedPassword, createdAt = new Date(), updatedAt = new Date(), requestCount = 0, darwinRequestCount = 0, darwinWsdlUrl, darwinAccessToken, firebaseId) {
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.requestCount = requestCount;
         this.darwinRequestCount = darwinRequestCount;
+        this.darwinWsdlUrl = darwinWsdlUrl;
+        this.darwinAccessToken = darwinAccessToken;
         this.firebaseId = firebaseId;
     }
     get uid() {

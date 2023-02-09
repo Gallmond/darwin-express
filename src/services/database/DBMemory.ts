@@ -1,7 +1,7 @@
-import User from "../../user";
-import { hashPassword } from "../auth";
-import { MILLISECONDS } from "../utils";
-import { DBClass, MutableUserData, RevokedTokenData } from "./types";
+import User from '../../user'
+import { hashPassword } from '../auth'
+import { MILLISECONDS } from '../utils'
+import { DBClass, MutableUserData, RevokedTokenData } from './types'
 
 type UsersTable = {[key: string]: User}
 type RevokedTokensTable = {[key: string]: RevokedTokenData}
@@ -33,7 +33,8 @@ class DBMemory extends DBClass{
     }
 
     createUser = async (username: string, plaintextPassword: string): Promise<User> => {
-        const existingUser = this.users[ username ] ?? null
+        const existingUser = await this.getUser( username )
+
         if(existingUser !== null){
             throw new Error(`${username} already exists`)
         }
@@ -56,11 +57,15 @@ class DBMemory extends DBClass{
         const {
             requestCount,
             darwinRequestCount,
+            darwinWsdlUrl,
+            darwinAccessToken,
             hashedPassword,
         } = this.users[username]
 
         this.users[username].requestCount = fields.requestCount ?? requestCount
         this.users[username].darwinRequestCount = fields.darwinRequestCount ?? darwinRequestCount
+        this.users[username].darwinWsdlUrl = fields.darwinWsdlUrl ?? darwinWsdlUrl
+        this.users[username].darwinAccessToken = fields.darwinAccessToken ?? darwinAccessToken
         this.users[username].hashedPassword = fields.hashedPassword ?? hashedPassword
 
         return true

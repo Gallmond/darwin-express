@@ -38,10 +38,11 @@ const easyJwt = new EasyJWT({
     refreshToken: {expiresIn: 60 * 60 * 24 * 7 },
 })
 
-const tokenRevokeCheck = async (jwt: JWTString, payload: JwtPayload) => {
-    return await db.getRevokedToken( jwt ) !== null
+// true if we don't have the current token stored in the revoked table
+const tokenIsNotRevoked = async (jwt: JWTString): Promise<boolean> => {
+    return await db.getRevokedToken( jwt ) === null
 }
 
-easyJwt.accessTokenValidation(tokenRevokeCheck)
+easyJwt.accessTokenValidation(tokenIsNotRevoked)
 
 export { easyJwt }

@@ -32,11 +32,6 @@ const processJwt = async (req, res, next) => {
             next(new exceptions_1.HTTP401Unauthorized('jwt missing subject'));
             return;
         }
-        const revokedTokenData = await db.getRevokedToken(token);
-        if (revokedTokenData) {
-            next(new exceptions_1.HTTP401Unauthorized('token revoked'));
-            return;
-        }
         const user = await db.getUser(payload.sub);
         if (!user) {
             next(new exceptions_1.HTTP401Unauthorized('jwt subject not found'));

@@ -87,10 +87,8 @@ authController.post('/register', async (req, res, next) => {
         return
     }
 
-    // create user
     const newUser = await db.createUser(username, password)
 
-    // generate a JWT
     const {accessToken, expiresIn, refreshToken} = easyJwt.createTokens(
         newUser.uid
     )

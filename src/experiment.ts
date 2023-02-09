@@ -1,6 +1,5 @@
 import app from './app'
 import type { Express } from 'express'
-import FirestoreFunctions from './services/firestore'
 
 class CoolApplication{
     constructor(

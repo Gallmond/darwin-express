@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HTTP401Unauthorized = exports.HTTP422UnprocessableEntity = exports.BaseError = void 0;
+exports.HTTP500DarwinException = exports.HTTP401Unauthorized = exports.HTTP422UnprocessableEntity = exports.BaseError = void 0;
 class BaseError extends Error {
     message;
     name;
@@ -44,3 +44,15 @@ class HTTP401Unauthorized extends BaseError {
     }
 }
 exports.HTTP401Unauthorized = HTTP401Unauthorized;
+class HTTP500DarwinException extends BaseError {
+    message;
+    name;
+    code;
+    constructor(message = 'Error using darwin service', name = 'HTTP500DarwinException', code = 500) {
+        super(message);
+        this.message = message;
+        this.name = name;
+        this.code = code;
+    }
+}
+exports.HTTP500DarwinException = HTTP500DarwinException;

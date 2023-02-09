@@ -1,8 +1,11 @@
+import { FirestoreDataConverter, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore'
 import type User from '../../user'
 
 export interface MutableUserData{
     requestCount?: number
     darwinRequestCount?: number
+    darwinWsdlUrl?: string
+    darwinAccessToken?: string
     hashedPassword?: string
 }
 
@@ -10,6 +13,31 @@ export interface RevokedTokenData{
     token: string,
     createdAt: Date,
     keepUntil: Date,
+}
+
+export interface FirestoreRevokedTokenData{
+    token: string,
+    createdAt: Timestamp,
+    keepUntil: Timestamp,
+}
+
+export const revokedTokenConverter: FirestoreDataConverter<RevokedTokenData> = {
+    toFirestore(tokenData: RevokedTokenData){
+        return {
+            token: tokenData.token,
+            createdAt: Timestamp.fromDate(tokenData.createdAt),
+            keepUntil: Timestamp.fromDate(tokenData.keepUntil),
+        }
+    },
+    fromFirestore(snapshot: QueryDocumentSnapshot<FirestoreRevokedTokenData>){
+        const { token, createdAt, keepUntil } = snapshot.data()
+        
+        return {
+            token,
+            createdAt: createdAt.toDate(),
+            keepUntil: keepUntil.toDate(),
+        }
+    }
 }
 
 export abstract class DBClass{

@@ -36,3 +36,13 @@ export class HTTP401Unauthorized extends BaseError{
         super(message)
     }
 }
+
+export class HTTP500DarwinException extends BaseError{
+    constructor(
+        public message = 'Error using darwin service',
+        public name = 'HTTP500DarwinException',
+        public code = 500,
+    ){
+        super(message)
+    }
+}

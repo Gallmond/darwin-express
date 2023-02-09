@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const auth_1 = __importDefault(require("./http/controllers/auth"));
+const darwin_1 = __importDefault(require("./http/controllers/darwin"));
 const exceptions_1 = require("./http/controllers/exceptions");
 const auth_2 = require("./http/middleware/auth");
 // global middleware
@@ -22,6 +23,7 @@ app.get('/guarded', async (req, res, next) => {
     res.status(200).json(req.auth.user);
 });
 app.use(auth_1.default);
+app.use(darwin_1.default);
 // global error handler
 const globalErrorHandler = (err, req, res, next) => {
     if (err instanceof exceptions_1.BaseError) {

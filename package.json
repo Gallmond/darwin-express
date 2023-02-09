@@ -30,6 +30,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "darwin-ldb-node": "^0.0.1",
     "dotenv": "^16.0.3",
     "easy-jwt": "^0.2.1",
     "express": "^4.18.2",

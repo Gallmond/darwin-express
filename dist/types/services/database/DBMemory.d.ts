@@ -1,5 +1,5 @@
-import User from "../../user";
-import { DBClass, MutableUserData, RevokedTokenData } from "./types";
+import User from '../../user';
+import { DBClass, MutableUserData, RevokedTokenData } from './types';
 type UsersTable = {
     [key: string]: User;
 };

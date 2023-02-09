@@ -5,6 +5,29 @@ import { easyJwt } from '../src/services/auth'
 import CoolApplication from '../src/experiment'
 import database from '../src/services/database'
 
+const arrivalsAndDeparturesMock = jest.fn().mockResolvedValue({
+    foo: 'bar'
+})
+
+// we have to set up darwin mocks so we're not just using the real service
+jest.mock('darwin-ldb-node', () => {
+    return {
+        Darwin: jest.fn().mockImplementation(() => {
+            return {
+                arrivalsAndDepartures: (...args: unknown[]) => {
+                    console.debug('mocked call', {args})
+                    return arrivalsAndDeparturesMock()
+                },
+                init: jest.fn().mockResolvedValue(true)
+            }
+        }),
+        SoapConnector: jest.fn().mockImplementation(() => {
+            return {}
+        })
+    }
+})
+
+
 const DAY = 1000 * 60 * 60 * 24
 
 const db = database.singleton()
@@ -376,7 +399,8 @@ describe('/revoke', () => {
             .set('authorization', `Bearer ${accessToken}`)
             .send()
 
-        const expectedErr = new HTTP401Unauthorized('token revoked')
+        // this fails in the custom token verification method
+        const expectedErr = new HTTP401Unauthorized('access_token is invalid')
         const expectedJson = expectedErr.json
 
         expect(guardedResponse.status).toBe(expectedErr.code)
@@ -417,9 +441,94 @@ describe('/revoke', () => {
     })
 })
 
-describe('/arrivalsAndDepartures/{csr}/to|from/{csr}', () => {
-    test.todo('get expected response')
-    test.todo('invalid params get 422')
+describe('/arrivalsAndDepartures', () => {
+    test('401 unauthorised', async ()=> {
+
+        const response = await service
+            .get('/arrivalsAndDepartures')
+            .send()
+
+        const expectedErr = new HTTP401Unauthorized('Not authorised')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+    
+    test('422 missing crs', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+
+        const response = await service
+            .get('/arrivalsAndDepartures')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const expectedErr = new HTTP422UnprocessableEntity('missing crs')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+
+    test('422 incorrect type', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+
+        const response = await service
+            .get('/arrivalsAndDepartures/NCL/foobar')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const expectedErr = new HTTP422UnprocessableEntity('type must be "to" or "from" if it is used')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+
+    test('422 missing filterCrs', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+
+        const response = await service
+            .get('/arrivalsAndDepartures/NCL/to/')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const expectedErr = new HTTP422UnprocessableEntity('filterCrs must be set if type is set')
+        const expectedJson = expectedErr.json
+
+        expect(response.status).toBe(expectedErr.code)
+        expect(response.body).toEqual(expectedJson)
+    })
+
+    test('all at CSR', async () => {
+        //TODO make real requests
+        // save the arrivalsAndDepartrues output as json
+        // use that in the above mocks
+        
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+        await db.updateUser(username, {
+            darwinWsdlUrl: 'https://fakedomain.com',
+            darwinAccessToken: 'some-access-token'
+        })
+
+        const response = await service
+            .get('/arrivalsAndDepartures/NCL')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const {status, body} = response
+
+        console.debug({status, body})
+
+
+
+    })
+    test.todo('CSR to CSR')
+    test.todo('CSR from CSR')
 })
 
 describe('/serviceDetails/{serviceId}', () => {

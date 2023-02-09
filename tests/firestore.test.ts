@@ -3,6 +3,10 @@ import { randomBytes } from 'crypto'
 import { easyJwt } from '../src/services/auth'
 import FirestoreFunctions from '../src/services/firestore'
 
+/**
+ * This test explicitly uses the firestore DB implementation, so instantiate it
+ * directly
+ */
 const firestoreFunctions = FirestoreFunctions.singleton
 
 const rand = () => randomBytes(16).toString('hex')

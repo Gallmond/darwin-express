@@ -12,8 +12,10 @@ declare class User {
     updatedAt: Date;
     requestCount: number;
     darwinRequestCount: number;
+    darwinWsdlUrl?: string | undefined;
+    darwinAccessToken?: string | undefined;
     private firebaseId?;
-    constructor(username: string, hashedPassword: string, createdAt?: Date, updatedAt?: Date, requestCount?: number, darwinRequestCount?: number, firebaseId?: string | undefined);
+    constructor(username: string, hashedPassword: string, createdAt?: Date, updatedAt?: Date, requestCount?: number, darwinRequestCount?: number, darwinWsdlUrl?: string | undefined, darwinAccessToken?: string | undefined, firebaseId?: string | undefined);
     get uid(): string;
     set uid(val: string);
     get json(): {

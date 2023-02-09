@@ -1,7 +1,10 @@
+import { FirestoreDataConverter, Timestamp } from 'firebase/firestore';
 import type User from '../../user';
 export interface MutableUserData {
     requestCount?: number;
     darwinRequestCount?: number;
+    darwinWsdlUrl?: string;
+    darwinAccessToken?: string;
     hashedPassword?: string;
 }
 export interface RevokedTokenData {
@@ -9,6 +12,12 @@ export interface RevokedTokenData {
     createdAt: Date;
     keepUntil: Date;
 }
+export interface FirestoreRevokedTokenData {
+    token: string;
+    createdAt: Timestamp;
+    keepUntil: Timestamp;
+}
+export declare const revokedTokenConverter: FirestoreDataConverter<RevokedTokenData>;
 export declare abstract class DBClass {
     static make: () => DBClass;
     static singleton: () => DBClass;

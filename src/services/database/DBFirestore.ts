@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app'
-import { collection, connectFirestoreEmulator, deleteDoc, doc, Firestore, getDoc, getDocs, getFirestore, setDoc, Timestamp } from 'firebase/firestore'
+import { collection, connectFirestoreEmulator, deleteDoc, doc, DocumentReference, Firestore, getDoc, getDocs, getFirestore, setDoc, Timestamp } from 'firebase/firestore'
 import User, { userConverter } from '../../user'
 import { hashPassword } from '../auth'
-import { DBClass, MutableUserData, RevokedTokenData } from './types'
+import { DBClass, MutableUserData, revokedTokenConverter, RevokedTokenData } from './types'
 import { MILLISECONDS } from '../utils'
 
 interface FirestoreRevokedTokenData{
@@ -52,15 +52,13 @@ class DBFirestore extends DBClass{
     }
 
     createUser = async (username: string, plaintextPassword: string): Promise<User> => {
-        const existingUser = this.getUser( username )
+        const existingUser = await this.getUser( username )
         if(existingUser !== null){
             throw new Error(`${username} already exists`)
         }
 
         const user = new User(username, hashPassword(plaintextPassword))
-
-        const docRef = doc(this.firestore, 'users', user.username).withConverter(userConverter)
-
+        const docRef = this.userDoc(username)
         user.uid = docRef.id
 
         await setDoc(docRef, user)
@@ -69,21 +67,22 @@ class DBFirestore extends DBClass{
     } 
 
     getUser = async (username: string): Promise<User | null> => {
-        const docRef = doc(this.firestore, 'users', username).withConverter(userConverter)
+        const docRef = this.userDoc(username)
         const snapshot = await getDoc(docRef)
 
         return snapshot.exists() ? snapshot.data() : null
     } 
 
     updateUser = async (username: string, fields: MutableUserData): Promise<boolean> => {
-        const docRef = doc(this.firestore, 'users', username).withConverter(userConverter)
+        const docRef = this.userDoc(username)
+
         await setDoc(docRef, fields, {merge: true})
 
         return true
     } 
     
     deleteUser = async (username: string): Promise<boolean> => {
-        await deleteDoc(doc(this.firestore, 'users', username))
+        await deleteDoc(this.userDoc(username))
 
         return true
     } 
@@ -98,7 +97,7 @@ class DBFirestore extends DBClass{
             token, keepUntil, createdAt
         }
 
-        const docRef = doc(this.firestore, 'revoked_tokens', token)
+        const docRef = this.tokenDoc(token)
 
         await setDoc(docRef, data)
 
@@ -106,40 +105,40 @@ class DBFirestore extends DBClass{
     } 
     
     getRevokedToken = async (token: string): Promise<RevokedTokenData | null> => {
-        const docRef = doc(this.firestore, 'revoked_tokens', token)
+        const docRef = this.tokenDoc(token)
         const docSnapshot = await getDoc(docRef)
 
         if(!docSnapshot || !docSnapshot.exists()){
             return null
         }
 
-        const docData = docSnapshot.data() as FirestoreRevokedTokenData | undefined
+        const docData = docSnapshot.data()
         if(!docData){
             throw new Error('revoked_token document has no data')
         }
 
         const now = new Date().valueOf()
-        if(now > docData.keepUntil.toDate().valueOf()){
+        if(now > docData.keepUntil.valueOf()){
             await this.deleteRevokedToken(token)
             return null
         }
 
         return{
             token: docData.token,
-            createdAt: docData.createdAt.toDate(),
-            keepUntil: docData.keepUntil.toDate(),
+            createdAt: docData.createdAt,
+            keepUntil: docData.keepUntil,
         }
     } 
 
     deleteRevokedToken = async (token: string): Promise<boolean> => {
-        const docRef = doc(this.firestore, 'revoked_tokens', token)
+        const docRef = this.tokenDoc(token)
         await deleteDoc(docRef)
 
         return true
     } 
 
     deleteAllTestUsers = async (): Promise<string[]> => {
-        const collectionRef = collection(this.firestore, 'users')
+        const collectionRef = this.userCollection()
         const docs = await getDocs(collectionRef)
 
         const toDelete: string[] = []
@@ -150,14 +149,14 @@ class DBFirestore extends DBClass{
         })
 
         await Promise.all(toDelete.map(documentId => {
-            return deleteDoc(doc(this.firestore, 'users', documentId))
+            return deleteDoc(this.userDoc(documentId))
         }))
 
         return toDelete
     } 
 
     deleteAllRevokedTokens = async (): Promise<string[]> => {
-        const collectionRef = collection(this.firestore, 'revoked_tokens')
+        const collectionRef = this.tokenCollection()
         const docs = await getDocs(collectionRef)
 
         const toDelete: string[] = []
@@ -166,11 +165,28 @@ class DBFirestore extends DBClass{
         })
 
         await Promise.all(toDelete.map(documentId => {
-            return deleteDoc(doc(this.firestore, 'revoked_tokens', documentId))
+            return deleteDoc(this.tokenDoc(documentId))
         }))
 
         return toDelete
     } 
+
+    private tokenDoc = (token: string): DocumentReference => {
+        return doc(this.firestore, 'revoked_tokens', token).withConverter(revokedTokenConverter)
+    }
+
+    private userDoc = (username: string): DocumentReference<User> => {
+        return doc(this.firestore, 'users', username).withConverter(userConverter)
+    }
+
+    private tokenCollection = () => {
+        return collection(this.firestore, 'revoked_tokens').withConverter(revokedTokenConverter)
+    }
+
+    private userCollection = () => {
+        return collection(this.firestore, 'users').withConverter(userConverter)
+    }
+
 }
 
 export default DBFirestore

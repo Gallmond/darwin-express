@@ -21,4 +21,10 @@ export declare class HTTP401Unauthorized extends BaseError {
     code: number;
     constructor(message?: string, name?: string, code?: number);
 }
+export declare class HTTP500DarwinException extends BaseError {
+    message: string;
+    name: string;
+    code: number;
+    constructor(message?: string, name?: string, code?: number);
+}
 //# sourceMappingURL=exceptions.d.ts.map

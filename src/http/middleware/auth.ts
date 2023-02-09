@@ -34,12 +34,6 @@ export const processJwt: RequestHandler = async (req, res, next) => {
             return
         } 
 
-        const revokedTokenData = await db.getRevokedToken( token )
-        if(revokedTokenData){
-            next(new HTTP401Unauthorized('token revoked'))
-            return
-        }
-
         const user = await db.getUser( payload.sub )
         if(!user){
             next(new HTTP401Unauthorized('jwt subject not found'))
