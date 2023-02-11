@@ -1,6 +1,5 @@
 import router, { NextFunction, Request } from 'express'
-import { type } from 'os'
-import { darwinForUser } from '../../services/darwin'
+import { arrivalsAndDepartures, darwinForUser, serviceDetails } from '../../services/darwin'
 import database from '../../services/database'
 import User from '../../user'
 import { HTTP401Unauthorized, HTTP422UnprocessableEntity, HTTP500DarwinException } from './exceptions'
@@ -78,14 +77,46 @@ darwinController.get('/arrivalsAndDepartures/:crs?/:type?/:filterCrs?', async (r
     const options = validateParams(req, next)
     if(!options) return
 
-    console.log({auth: req.auth})
-
     const darwin = await darwinForUser(req.auth.user)
-    const data = await darwin.arrivalsAndDepartures(options)
 
-    //TODO transform this
+    const {crs, filterCrs, type} = options
+
+    const [data, ] = await Promise.all([
+        await arrivalsAndDepartures(darwin, crs, type, filterCrs),
+        incrementRequests(req.auth.user)
+    ])
 
     res.json(data).send()
 })
+
+darwinController.get('/service/:serviceId', async (req, res, next) => {
+    if(req.auth === undefined){
+        next(new HTTP401Unauthorized('Not authorised'))
+        return
+    }
+
+    const {serviceId} = pathParams(req, 'serviceId')
+    if(!serviceId){
+        next(new HTTP422UnprocessableEntity('missing serviceId'))
+        return
+    }
+
+    const darwin = await darwinForUser(req.auth.user)
+    const [data, ] = await Promise.all([
+        await serviceDetails(darwin, serviceId),
+        incrementRequests(req.auth.user)
+    ])
+
+    //TODO format this
+    res.json(data).send()
+})
+
+
+
+
+
+
+
+
 
 export default darwinController

@@ -1,0 +1,141 @@
+{
+  "generatedAt": "2023-02-11T18:09:49.180Z",
+  "locationName": "Newcastle",
+  "crs": "NCL",
+  "operator": "Northern",
+  "operatorCode": "NT",
+  "length": 2,
+  "platform": "3",
+  "alerts": [],
+  "sta": "18:15",
+  "eta": "On time",
+  "ata": null,
+  "std": "18:17",
+  "etd": "On time",
+  "atd": null,
+  "delayReason": null,
+  "isCancelled": null,
+  "cancelledReason": null,
+  "isDiverted": false,
+  "divertedVia": null,
+  "diversionReason": null,
+  "splits": null,
+  "callingPoints": {
+    "to": {
+      "MPT": [
+        {
+          "locationName": "Manors",
+          "crs": "MAS",
+          "st": "18:19",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Cramlington",
+          "crs": "CRM",
+          "st": "18:29",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Morpeth",
+          "crs": "MPT",
+          "st": "18:37",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    },
+    "from": {
+      "CAR": [
+        {
+          "locationName": "Carlisle",
+          "crs": "CAR",
+          "st": "16:54",
+          "et": null,
+          "at": "16:56",
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Haltwhistle",
+          "crs": "HWH",
+          "st": "17:22",
+          "et": null,
+          "at": "17:26",
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Hexham",
+          "crs": "HEX",
+          "st": "17:42",
+          "et": null,
+          "at": "17:44",
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Prudhoe",
+          "crs": "PRU",
+          "st": "17:54",
+          "et": null,
+          "at": "17:56",
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Metro Centre",
+          "crs": "MCE",
+          "st": "18:06",
+          "et": null,
+          "at": "18:07",
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Dunston",
+          "crs": "DOT",
+          "st": "18:09",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": 2,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    }
+  },
+  "formation": {
+    "isReverse": null,
+    "category": {
+      "loadingCode": null,
+      "colour": null,
+      "image": null
+    },
+    "coaches": []
+  }
+}

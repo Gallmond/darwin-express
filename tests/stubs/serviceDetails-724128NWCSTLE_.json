@@ -1,0 +1,61 @@
+{
+  "generatedAt": "2023-02-11T18:09:49.221Z",
+  "locationName": "Newcastle",
+  "crs": "NCL",
+  "operator": "London North Eastern Railway",
+  "operatorCode": "GR",
+  "length": null,
+  "platform": "2",
+  "alerts": [],
+  "sta": null,
+  "eta": null,
+  "ata": null,
+  "std": "18:43",
+  "etd": "On time",
+  "atd": null,
+  "delayReason": null,
+  "isCancelled": null,
+  "cancelledReason": null,
+  "isDiverted": false,
+  "divertedVia": null,
+  "diversionReason": null,
+  "splits": null,
+  "callingPoints": {
+    "to": {
+      "EDB": [
+        {
+          "locationName": "Alnmouth",
+          "crs": "ALM",
+          "st": "19:08",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Edinburgh",
+          "crs": "EDB",
+          "st": "20:13",
+          "et": "On time",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    },
+    "from": {}
+  },
+  "formation": {
+    "isReverse": null,
+    "category": {
+      "loadingCode": null,
+      "colour": null,
+      "image": null
+    },
+    "coaches": []
+  }
+}

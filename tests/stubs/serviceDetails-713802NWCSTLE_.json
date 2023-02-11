@@ -1,0 +1,295 @@
+{
+  "generatedAt": "2023-02-11T18:09:48.878Z",
+  "locationName": "Newcastle",
+  "crs": "NCL",
+  "operator": "Northern",
+  "operatorCode": "NT",
+  "length": 4,
+  "platform": "7",
+  "alerts": [],
+  "sta": "17:55",
+  "eta": "18:11",
+  "ata": null,
+  "std": "17:56",
+  "etd": "18:12",
+  "atd": null,
+  "delayReason": "This train has been delayed by congestion",
+  "isCancelled": null,
+  "cancelledReason": null,
+  "isDiverted": false,
+  "divertedVia": null,
+  "diversionReason": null,
+  "splits": null,
+  "callingPoints": {
+    "to": {
+      "HEX": [
+        {
+          "locationName": "Dunston",
+          "crs": "DOT",
+          "st": "18:02",
+          "et": "18:18",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Metro Centre",
+          "crs": "MCE",
+          "st": "18:05",
+          "et": "18:21",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Blaydon",
+          "crs": "BLO",
+          "st": "18:09",
+          "et": "18:25",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Wylam",
+          "crs": "WYM",
+          "st": "18:16",
+          "et": "18:31",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Prudhoe",
+          "crs": "PRU",
+          "st": "18:20",
+          "et": "18:35",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Stocksfield",
+          "crs": "SKS",
+          "st": "18:25",
+          "et": "18:40",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Riding Mill",
+          "crs": "RDM",
+          "st": "18:29",
+          "et": "18:44",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Corbridge",
+          "crs": "CRB",
+          "st": "18:34",
+          "et": "18:49",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Hexham",
+          "crs": "HEX",
+          "st": "18:40",
+          "et": "18:54",
+          "at": null,
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    },
+    "from": {
+      "NNT": [
+        {
+          "locationName": "Nunthorpe",
+          "crs": "NNT",
+          "st": "16:18",
+          "et": null,
+          "at": "16:33",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Gypsy Lane",
+          "crs": "GYP",
+          "st": "16:20",
+          "et": null,
+          "at": "16:36",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Marton",
+          "crs": "MTO",
+          "st": "16:23",
+          "et": null,
+          "at": "16:39",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "James Cook",
+          "crs": "JCH",
+          "st": "16:25",
+          "et": null,
+          "at": "16:42",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Middlesbrough",
+          "crs": "MBR",
+          "st": "16:32",
+          "et": null,
+          "at": "16:50",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Thornaby",
+          "crs": "TBY",
+          "st": "16:37",
+          "et": null,
+          "at": "16:56",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Stockton",
+          "crs": "STK",
+          "st": "16:42",
+          "et": null,
+          "at": "17:03",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Billingham",
+          "crs": "BIL",
+          "st": "16:50",
+          "et": null,
+          "at": "17:11",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Seaton Carew",
+          "crs": "SEC",
+          "st": "16:56",
+          "et": null,
+          "at": "17:17",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Hartlepool",
+          "crs": "HPL",
+          "st": "17:01",
+          "et": null,
+          "at": "17:24",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Horden",
+          "crs": "HRE",
+          "st": "17:12",
+          "et": null,
+          "at": "17:35",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Seaham",
+          "crs": "SEA",
+          "st": "17:20",
+          "et": null,
+          "at": "17:44",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Sunderland",
+          "crs": "SUN",
+          "st": "17:30",
+          "et": null,
+          "at": "17:54",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Heworth",
+          "crs": "HEW",
+          "st": "17:47",
+          "et": null,
+          "at": "18:05",
+          "isCancelled": null,
+          "length": 4,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    }
+  },
+  "formation": {
+    "isReverse": null,
+    "category": {
+      "loadingCode": null,
+      "colour": null,
+      "image": null
+    },
+    "coaches": []
+  }
+}

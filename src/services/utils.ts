@@ -10,3 +10,20 @@ export const daysBetweenDates = (dateOne: Date, dateTwo: Date): number => {
 
     return diff / MILLISECONDS.DAY
 }
+
+/**
+ * only an actual boolean or string 'true' should be true
+ */
+export const boolOrNull = (val: unknown): boolean | null => {
+    if(typeof val === null) return null
+    
+    if(typeof val === 'boolean') return val
+
+    if(typeof val === 'string'){
+        if(val.toLowerCase() === 'true') return true
+        
+        return false
+    }
+
+    return false
+}

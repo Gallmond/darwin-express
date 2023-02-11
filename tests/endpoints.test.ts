@@ -6,30 +6,72 @@ import CoolApplication from '../src/experiment'
 import database from '../src/services/database'
 import { readFileSync } from 'fs'
 
+const expectType = (val: unknown, ...types: string[]) => {
+    const hasType = isType(val, ...types)
+    if(!hasType) console.error('val does not have type', {val, types})
+    
+    expect(hasType).toBe(true)
+}
 
+const isType = (val: unknown, ...types: string[]) => {
+    for (const type of types) {
+        if(typeof val === type) return true
+    }
+    
+    return false
+}
 
-// build stubs
+/**
+ * We can mock the 'darwin-ldb-node' module here to return some data stubs instead
+ * of making a real service request
+ * 
+ * First prepare the response data
+ */
 const stubDir = `${__dirname}/stubs`
 
+// /NCL
 const ncl = jest.fn().mockResolvedValue(
     JSON.parse(readFileSync(`${stubDir}/AllAtCrs.json`, {encoding: 'utf-8'})).response
 )
+// /NCL/from/KGX
 const nclFromKgx = jest.fn().mockResolvedValue(
     JSON.parse(readFileSync(`${stubDir}/CrsFromCrs.json`, {encoding: 'utf-8'})).response
 )
+// /NCL/to/KGX
 const nclToKgx = jest.fn().mockResolvedValue(
     JSON.parse(readFileSync(`${stubDir}/CrsToCrs.json`, {encoding: 'utf-8'})).response
 )
 
-// we have to set up darwin mocks so we're not just using the real service
+const serviceDetailsMocks: Record<string, CallableFunction>  = {
+    '713802NWCSTLE_': jest.fn().mockResolvedValue(
+        JSON.parse(readFileSync(`${stubDir}/serviceDetails-713802NWCSTLE_.json`, {encoding: 'utf-8'}))
+    )
+}
+
+/**
+ * Mock the module itself and conditionally return the correct data stub depending
+ * on the args
+ */
 jest.mock('darwin-ldb-node', () => {
     return {
         Darwin: jest.fn().mockImplementation(() => {
             return {
+                serviceDetails: (...args: unknown[]) => {
+                    const serviceID = (args[0] ?? '') as string
+
+                    console.debug(Object.keys(serviceDetailsMocks))
+                    const mockResponse = serviceDetailsMocks[ serviceID ]
+
+                    if(mockResponse){
+                        return mockResponse()
+                    }
+
+                    throw new Error(`No mocked response for ${serviceID}`)
+                },
                 arrivalsAndDepartures: (...args: unknown[]) => {
-            
                     const options = (args[0] ?? {}) as Record<string, string>
 
+                    // {crs: 'NCL', filterType: 'to', filterCrs: 'KGX'}
                     if(
                         typeof options === 'object'
                         && options.crs === 'NCL'
@@ -39,6 +81,7 @@ jest.mock('darwin-ldb-node', () => {
                         return nclToKgx()
                     }
 
+                    // {crs: 'NCL', filterType: 'from', filterCrs: 'KGX'}
                     if(
                         typeof options === 'object'
                         && options.crs === 'NCL'
@@ -48,6 +91,7 @@ jest.mock('darwin-ldb-node', () => {
                         return nclFromKgx()
                     }
 
+                    // {crs: 'NCL'}
                     if(
                         typeof options === 'object'
                         && options.crs === 'NCL'
@@ -55,7 +99,9 @@ jest.mock('darwin-ldb-node', () => {
                         return ncl()
                     }
 
-                    throw new Error('missing stub')
+                    const msg = 'No stub prepared for request options'
+                    console.error(msg, options)
+                    throw new Error(msg)
                 },
                 init: jest.fn().mockResolvedValue(true)
             }
@@ -483,6 +529,35 @@ describe('/revoke', () => {
 
 describe('/arrivalsAndDepartures', () => {
 
+    const checkOriginDestFormat = (obj: Record<string, Record<string, unknown>>) => {
+        const stationCodes = Object.keys(obj)
+        stationCodes.forEach(crs => {
+            const data = obj[crs]  
+            expect(typeof data.name).toBe('string')
+            expect(typeof data.station).toBe('string')
+            expect(isType(data.unreachable, 'undefined', 'boolean')).toBe(true)
+            expect(isType(data.via,'undefined', 'string')).toBe(true)
+        })
+    }
+
+    const checkCallingPointFormat = (obj: Record<string, Record<string, unknown>[]>) => {
+        const stationCodes = Object.keys(obj)
+        stationCodes.forEach((crs: string) => {
+            const points = obj[ crs ]
+            points.forEach(point => {
+                expect(typeof point.name).toBe('string')
+                expect(typeof point.station).toBe('string')
+                expectType(point.scheduledTime, 'string', 'undefined')
+                expectType(point.estimatedTime, 'string', 'undefined')
+                expectType(point.actualTime, 'string', 'undefined')
+                expectType(point.cancelled, 'boolean', 'undefined')
+                expectType(point.length, 'number', 'undefined')
+                expectType(point.split, 'boolean', 'undefined')
+                expect(Array.isArray(point.alerts)).toBe(true)
+            })
+        })
+    }
+
     test('401 unauthorised', async ()=> {
 
         const response = await service
@@ -544,13 +619,69 @@ describe('/arrivalsAndDepartures', () => {
         expect(response.body).toEqual(expectedJson)
     })
 
-    test('all at CSR', async () => {
-        // TODO
-        // - make some real requests
-        // - save the darwin-ldb-node returned json
-        // - set up fixtures that mock darwin-ldb-node
-        // - use them for these endpoint tests 
-        
+    test('/NCL', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+        await db.updateUser(username, {
+            darwinWsdlUrl: 'https://fakedomain.com',
+            darwinAccessToken: 'some-access-token'
+        })
+
+        // assert that the request counts are zero
+        const preRequestUser = await db.getUser(username)
+        expect(preRequestUser?.darwinRequestCount).toBe(0)
+        expect(preRequestUser?.requestCount).toBe(0)
+
+        const response = await service
+            .get('/arrivalsAndDepartures/NCL')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const {status, body} = response
+        expect(status).toBe(200)
+        expect(typeof body).toBe('object')
+
+        expectType(body.station, 'string')
+        expectType(body.generatedAt, 'string')
+        expect(Array.isArray(body.services)).toBe(true)
+
+        body.services.forEach((service: Record<string, unknown>) => {
+            expect(typeof service.id).toBe('string')
+            expectType(service.estimatedArrival, 'string', 'undefined')
+            expectType(service.scheduledArrival, 'string', 'undefined')
+            expectType(service.estimatedDeparture, 'string', 'undefined')
+            expectType(service.scheduledDeparture, 'string', 'undefined')
+            expect(typeof service.cancelled).toBe('boolean')
+            expectType(service.platform, 'string', 'undefined')
+            expect(typeof service.operator).toBe('string')
+            expect(typeof service.operatorCode).toBe('string')
+            expect(typeof service.scheduledFrom).toBe('object')
+            expect(typeof service.currentFrom).toBe('object')
+            expect(typeof service.scheduledTo).toBe('object')
+            expect(typeof service.currentTo).toBe('object')
+            expect(typeof service.callingAt).toBe('object')
+            expect(typeof service.calledAt).toBe('object')
+    
+            type NestedRecord = Record<string, Record<string, unknown>>
+            type NestedRecordArray = Record<string, Record<string, unknown>[]>
+
+            checkOriginDestFormat(service.scheduledFrom as NestedRecord)
+            checkOriginDestFormat(service.currentFrom as NestedRecord)
+            checkOriginDestFormat(service.scheduledTo as NestedRecord)
+            checkOriginDestFormat(service.currentTo as NestedRecord)
+    
+            checkCallingPointFormat(service.callingAt as NestedRecordArray)
+            checkCallingPointFormat(service.calledAt as NestedRecordArray)
+        })
+
+        // check that the request count is incremented
+        const postRequestUser = await db.getUser(username)
+        expect(postRequestUser?.darwinRequestCount).toBe(1)
+        expect(postRequestUser?.requestCount).toBe(1)
+    })
+
+    test('/NCL/to/KGX', async () => {
+
         const {username, password, accessToken} = testUserCredentials()
         await db.createUser(username, password)
         await db.updateUser(username, {
@@ -559,22 +690,139 @@ describe('/arrivalsAndDepartures', () => {
         })
 
         const response = await service
-            .get('/arrivalsAndDepartures/NCL')
+            .get('/arrivalsAndDepartures/NCL/to/KGX')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const {status, body} = response
+        expect(status).toBe(200)
+        expect(typeof body).toBe('object')
+
+        expectType(body.station, 'string')
+        expectType(body.generatedAt, 'string')
+        expect(Array.isArray(body.services)).toBe(true)
+
+        body.services.forEach((service: Record<string, unknown>) => {
+            expect(typeof service.id).toBe('string')
+            expectType(service.estimatedArrival, 'string', 'undefined')
+            expectType(service.scheduledArrival, 'string', 'undefined')
+            expectType(service.estimatedDeparture, 'string', 'undefined')
+            expectType(service.scheduledDeparture, 'string', 'undefined')
+            expect(typeof service.cancelled).toBe('boolean')
+            expectType(service.platform, 'string', 'undefined')
+            expect(typeof service.operator).toBe('string')
+            expect(typeof service.operatorCode).toBe('string')
+            expect(typeof service.scheduledFrom).toBe('object')
+            expect(typeof service.currentFrom).toBe('object')
+            expect(typeof service.scheduledTo).toBe('object')
+            expect(typeof service.currentTo).toBe('object')
+            expect(typeof service.callingAt).toBe('object')
+            expect(typeof service.calledAt).toBe('object')
+    
+            type NestedRecord = Record<string, Record<string, unknown>>
+            type NestedRecordArray = Record<string, Record<string, unknown>[]>
+
+            checkOriginDestFormat(service.scheduledFrom as NestedRecord)
+            checkOriginDestFormat(service.currentFrom as NestedRecord)
+            checkOriginDestFormat(service.scheduledTo as NestedRecord)
+            checkOriginDestFormat(service.currentTo as NestedRecord)
+    
+            checkCallingPointFormat(service.callingAt as NestedRecordArray)
+            checkCallingPointFormat(service.calledAt as NestedRecordArray)
+        })
+
+    })
+
+    test('/NCL/from/KGX', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+        await db.updateUser(username, {
+            darwinWsdlUrl: 'https://fakedomain.com',
+            darwinAccessToken: 'some-access-token'
+        })
+
+        const response = await service
+            .get('/arrivalsAndDepartures/NCL/from/KGX')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const {status, body} = response
+        expect(status).toBe(200)
+        expect(typeof body).toBe('object')
+
+        expectType(body.station, 'string')
+        expectType(body.generatedAt, 'string')
+        expect(Array.isArray(body.services)).toBe(true)
+
+        body.services.forEach((service: Record<string, unknown>) => {
+            expect(typeof service.id).toBe('string')
+            expectType(service.estimatedArrival, 'string', 'undefined')
+            expectType(service.scheduledArrival, 'string', 'undefined')
+            expectType(service.estimatedDeparture, 'string', 'undefined')
+            expectType(service.scheduledDeparture, 'string', 'undefined')
+            expect(typeof service.cancelled).toBe('boolean')
+            expectType(service.platform, 'string', 'undefined')
+            expect(typeof service.operator).toBe('string')
+            expect(typeof service.operatorCode).toBe('string')
+            expect(typeof service.scheduledFrom).toBe('object')
+            expect(typeof service.currentFrom).toBe('object')
+            expect(typeof service.scheduledTo).toBe('object')
+            expect(typeof service.currentTo).toBe('object')
+            expect(typeof service.callingAt).toBe('object')
+            expect(typeof service.calledAt).toBe('object')
+    
+            type NestedRecord = Record<string, Record<string, unknown>>
+            type NestedRecordArray = Record<string, Record<string, unknown>[]>
+
+            checkOriginDestFormat(service.scheduledFrom as NestedRecord)
+            checkOriginDestFormat(service.currentFrom as NestedRecord)
+            checkOriginDestFormat(service.scheduledTo as NestedRecord)
+            checkOriginDestFormat(service.currentTo as NestedRecord)
+    
+            checkCallingPointFormat(service.callingAt as NestedRecordArray)
+            checkCallingPointFormat(service.calledAt as NestedRecordArray)
+        })
+    })
+})
+
+describe('/service', () => {
+    
+    test('/service - 404 no serviceID', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+        await db.updateUser(username, {
+            darwinWsdlUrl: 'https://fakedomain.com',
+            darwinAccessToken: 'some-access-token'
+        })
+
+        const response = await service
+            .get('/service')
+            .set('authorization', `Bearer ${accessToken}`)
+            .send()
+
+        const {status} = response
+
+        expect(status).toBe(404)
+    })
+    
+    test('/service/{serviceID}', async () => {
+        const {username, password, accessToken} = testUserCredentials()
+        await db.createUser(username, password)
+        await db.updateUser(username, {
+            darwinWsdlUrl: 'https://fakedomain.com',
+            darwinAccessToken: 'some-access-token'
+        })
+
+        const serviceID = '713802NWCSTLE_'
+
+        const response = await service
+            .get(`/service/${serviceID}`)
             .set('authorization', `Bearer ${accessToken}`)
             .send()
 
         const {status, body} = response
 
         console.debug({status, body})
-
-
-
     })
-    test.todo('CSR to CSR')
-    test.todo('CSR from CSR')
-})
-
-describe('/serviceDetails/{serviceId}', () => {
-    test.todo('get expected response')
-    test.todo('invalid params get 422')
+    
 })

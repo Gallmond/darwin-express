@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2023-02-11T18:09:48.894Z",
+  "locationName": "Newcastle",
+  "crs": "NCL",
+  "operator": "Northern",
+  "operatorCode": "NT",
+  "length": null,
+  "platform": null,
+  "alerts": [],
+  "sta": null,
+  "eta": null,
+  "ata": null,
+  "std": "18:08",
+  "etd": "Cancelled",
+  "atd": null,
+  "delayReason": null,
+  "isCancelled": true,
+  "cancelledReason": "This train has been cancelled because of a short-notice change to the timetable",
+  "isDiverted": false,
+  "divertedVia": null,
+  "diversionReason": null,
+  "splits": null,
+  "callingPoints": {
+    "to": {
+      "PRU": [
+        {
+          "locationName": "Metro Centre",
+          "crs": "MCE",
+          "st": "18:17",
+          "et": "Cancelled",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Blaydon",
+          "crs": "BLO",
+          "st": "18:21",
+          "et": "Cancelled",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Wylam",
+          "crs": "WYM",
+          "st": "18:28",
+          "et": "Cancelled",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        },
+        {
+          "locationName": "Prudhoe",
+          "crs": "PRU",
+          "st": "18:33",
+          "et": "Cancelled",
+          "at": null,
+          "isCancelled": null,
+          "length": null,
+          "detachFront": null,
+          "adhocAlerts": null
+        }
+      ]
+    },
+    "from": {}
+  },
+  "formation": {
+    "isReverse": null,
+    "category": {
+      "loadingCode": null,
+      "colour": null,
+      "image": null
+    },
+    "coaches": []
+  }
+}

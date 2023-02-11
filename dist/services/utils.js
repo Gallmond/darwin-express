@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.daysBetweenDates = exports.MILLISECONDS = void 0;
+exports.boolOrNull = exports.daysBetweenDates = exports.MILLISECONDS = void 0;
 var MILLISECONDS;
 (function (MILLISECONDS) {
     MILLISECONDS[MILLISECONDS["HOUR"] = 3600000] = "HOUR";
@@ -11,3 +11,19 @@ const daysBetweenDates = (dateOne, dateTwo) => {
     return diff / MILLISECONDS.DAY;
 };
 exports.daysBetweenDates = daysBetweenDates;
+/**
+ * only an actual boolean or string 'true' should be true
+ */
+const boolOrNull = (val) => {
+    if (typeof val === null)
+        return null;
+    if (typeof val === 'boolean')
+        return val;
+    if (typeof val === 'string') {
+        if (val.toLowerCase() === 'true')
+            return true;
+        return false;
+    }
+    return false;
+};
+exports.boolOrNull = boolOrNull;

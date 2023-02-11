@@ -61,10 +61,30 @@ darwinController.get('/arrivalsAndDepartures/:crs?/:type?/:filterCrs?', async (r
     const options = validateParams(req, next);
     if (!options)
         return;
-    console.log({ auth: req.auth });
     const darwin = await (0, darwin_1.darwinForUser)(req.auth.user);
-    const data = await darwin.arrivalsAndDepartures(options);
-    //TODO transform this
+    const { crs, filterCrs, type } = options;
+    const [data,] = await Promise.all([
+        await (0, darwin_1.arrivalsAndDepartures)(darwin, crs, type, filterCrs),
+        incrementRequests(req.auth.user)
+    ]);
+    res.json(data).send();
+});
+darwinController.get('/service/:serviceId', async (req, res, next) => {
+    if (req.auth === undefined) {
+        next(new exceptions_1.HTTP401Unauthorized('Not authorised'));
+        return;
+    }
+    const { serviceId } = pathParams(req, 'serviceId');
+    if (!serviceId) {
+        next(new exceptions_1.HTTP422UnprocessableEntity('missing serviceId'));
+        return;
+    }
+    const darwin = await (0, darwin_1.darwinForUser)(req.auth.user);
+    const [data,] = await Promise.all([
+        await (0, darwin_1.serviceDetails)(darwin, serviceId),
+        incrementRequests(req.auth.user)
+    ]);
+    //TODO format this
     res.json(data).send();
 });
 exports.default = darwinController;
